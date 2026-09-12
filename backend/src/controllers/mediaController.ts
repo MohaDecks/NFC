@@ -1,5 +1,4 @@
 import path from "node:path";
-import { nanoid } from "nanoid";
 import type { Request, Response } from "express";
 import { Media } from "../models/Media";
 import { Profile } from "../models/Profile";
@@ -70,10 +69,7 @@ export async function uploadMedia(req: Request, res: Response) {
       "HEIC_UNSUPPORTED",
     );
   }
-  const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".avif"].includes(ext)
-    ? ext
-    : ".jpg";
-  const filename = `${nanoid(16)}${safeExt}`;
+  const filename = storage.safeName(originalName);
 
   let stored;
   try {

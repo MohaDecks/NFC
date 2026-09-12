@@ -6,12 +6,17 @@ export async function writeAudit(
   action: string,
   target: { id?: string; name?: string; type?: string } = {},
 ) {
-  await AuditLog.create({
-    admin: admin.id,
-    adminName: admin.name,
-    action,
-    targetType: target.type ?? "Profile",
-    targetId: target.id ?? "",
-    targetName: target.name ?? "",
-  });
+  try {
+    if (!admin?.id) return;
+    await AuditLog.create({
+      admin: admin.id,
+      adminName: admin.name || "Admin",
+      action,
+      targetType: target.type ?? "Profile",
+      targetId: target.id ?? "",
+      targetName: target.name ?? "",
+    });
+  } catch (err) {
+    console.error("Audit log failed", err);
+  }
 }

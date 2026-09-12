@@ -33,6 +33,14 @@ function resolveUploadsDir() {
 
 export const uploadsDir = resolveUploadsDir();
 
+export function safeImageName(original = "image.jpg") {
+  const ext = path.extname(String(original)).toLowerCase();
+  const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".avif", ".svg"].includes(ext)
+    ? ext
+    : ".jpg";
+  return `img-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${safeExt}`;
+}
+
 export type StoredFile = {
   filename: string;
   url: string;
@@ -148,5 +156,6 @@ export async function deleteFile(stored: { provider?: string; filename?: string;
 export const storage = {
   save: saveFile,
   delete: deleteFile,
+  safeName: safeImageName,
   cloudReady: cloudReady || Boolean(cloudinaryUrl),
 };

@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import { asyncHandler } from "../utils/asyncHandler";
 import { validate } from "../middleware/validate";
 import { requireAdmin, requirePermission } from "../middleware/auth";
-import { upload, uploadImage } from "../middleware/upload";
+import { uploadImage } from "../middleware/upload";
 import {
   adminAccountSchema,
   categorySchema,
@@ -106,7 +106,7 @@ adminRouter.use(requireAdmin);
 
 adminRouter.get("/branding", requirePermission("settings.view"), asyncHandler(getBranding));
 adminRouter.patch("/branding", requirePermission("settings.edit"), asyncHandler(updateBranding));
-adminRouter.post("/branding/logo", requirePermission("settings.edit"), upload.single("file"), asyncHandler(uploadBrandingLogo));
+adminRouter.post("/branding/logo", requirePermission("settings.edit"), uploadImage, asyncHandler(uploadBrandingLogo));
 adminRouter.delete("/branding/logo", requirePermission("settings.edit"), asyncHandler(removeBrandingLogo));
 
 adminRouter.get("/dashboard", requirePermission("profiles.view", "analytics.view"), asyncHandler(getDashboard));

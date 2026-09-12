@@ -99,17 +99,23 @@ export async function updateBranding(req: Request, res: Response) {
 export async function uploadBrandingLogo(req: Request, res: Response) {
   const actor = (req as AuthedRequest).user;
   const file = req.file;
-  if (!file) throw new AppError(400, "Choose a logo image", "NO_FILE");
+  if (!file?.buffer?.length) throw new AppError(400, "Choose a logo image", "NO_FILE");
   const branding = await getOrCreateBranding();
-  if (branding.logo?.publicId) await storage.delete(branding.logo);
-  const stored = await storage.save(`brand-logo-${Date.now()}-${file.originalname}`, file.buffer);
+  if (branding.logo?.publicId) await storage.delete(branding.logo).catch(() => undefined);
+  let stored;
+  try {
+    stored = await storage.save(storage.safeName(file.originalname), file.buffer);
+  } catch (err) {
+    console.error("Branding logo store failed", err);
+    throw new AppError(400, "Could not save this logo. Try a PNG or JPG.", "STORE_FAILED");
+  }
   branding.logo = {
     publicId: stored.publicId,
     secureUrl: stored.secureUrl,
-    width: stored.width,
-    height: stored.height,
-    resourceType: stored.resourceType,
-    provider: stored.provider,
+    width: stored.width || 0,
+    height: stored.height || 0,
+    resourceType: stored.resourceType || "image",
+    provider: stored.provider || "local",
     filename: stored.filename,
   };
   await branding.save();
