@@ -18,6 +18,8 @@ import { OpeningHoursEditor, SocialLinksEditor, TagInput } from "@/components/pr
 import { AdminMenuBuilder } from "@/components/admin/AdminMenuBuilder";
 import { AdminServicesBuilder } from "@/components/admin/AdminServicesBuilder";
 import { ImageUpload } from "@/components/profile/ImageUpload";
+import { CredentialEditor, ExperienceEditor, ProjectsEditor, SkillsEditor } from "@/components/admin/PortfolioEditors";
+import type { ContentItem } from "@/lib/sectionContent";
 import { ownerToPublic, type AdminProfile, type HotelRoomItem, type HotelServiceItem, type MenuCategory, type ProfileSectionItem, type PublicProfile } from "@/types";
 
 export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; onChange: (profile: AdminProfile) => void }) {
@@ -286,7 +288,45 @@ function SectionEditor({
       {section.type === "menu" && <AdminMenuBuilder profile={profile} />}
       {section.type === "services" && <AdminServicesBuilder profileId={profile.id} />}
       {section.type === "rooms" && <RoomsEditor profileId={profile.id} />}
-      {["testimonials", "faq", "experience", "skills", "portfolio", "products", "cta", "booking", "links"].includes(section.type) && (
+      {section.type === "skills" && (
+        <SkillsEditor
+          items={(Array.isArray(content.items) ? content.items : []) as ContentItem[]}
+          onChange={(items) => setContent({ ...content, items })}
+          onSave={() => void onSection({ content })}
+        />
+      )}
+      {section.type === "portfolio" && (
+        <ProjectsEditor
+          items={(Array.isArray(content.items) ? content.items : []) as ContentItem[]}
+          profileId={profile.id}
+          onChange={(items) => setContent({ ...content, items })}
+          onSave={() => void onSection({ content })}
+        />
+      )}
+      {section.type === "experience" && (
+        <ExperienceEditor
+          items={(Array.isArray(content.items) ? content.items : []) as ContentItem[]}
+          onChange={(items) => setContent({ ...content, items })}
+          onSave={() => void onSection({ content })}
+        />
+      )}
+      {section.type === "education" && (
+        <CredentialEditor
+          label="Education"
+          items={(Array.isArray(content.items) ? content.items : []) as ContentItem[]}
+          onChange={(items) => setContent({ ...content, items })}
+          onSave={() => void onSection({ content })}
+        />
+      )}
+      {section.type === "certifications" && (
+        <CredentialEditor
+          label="Certifications"
+          items={(Array.isArray(content.items) ? content.items : []) as ContentItem[]}
+          onChange={(items) => setContent({ ...content, items })}
+          onSave={() => void onSection({ content })}
+        />
+      )}
+      {["testimonials", "faq", "products", "cta", "booking", "links"].includes(section.type) && (
         <GenericContent content={content} onChange={setContent} onSave={() => void onSection({ content })} />
       )}
       {section.type === "hero" && <p className="text-sm text-muted-foreground">Hero uses the profile name, tagline, logo, and cover from Overview and Media.</p>}

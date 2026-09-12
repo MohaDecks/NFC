@@ -1,6 +1,6 @@
 import type { PublicProfile } from "@/types";
-import { PersonalPlace } from "@/components/public/PersonalPlace";
+import { PersonalPortfolio } from "@/components/public/PersonalPortfolio";
 
 export function PersonalTemplate({ profile }: { profile: PublicProfile }) {
-  return <PersonalPlace profile={profile} />;
+  return <PersonalPortfolio profile={profile} />;
 }

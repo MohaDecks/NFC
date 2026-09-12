@@ -10,6 +10,7 @@ export type SocialKind =
   | "linkedin"
   | "x"
   | "snapchat"
+  | "github"
   | "website";
 
 export const SOCIAL_PLATFORMS: { id: SocialKind; label: string }[] = [
@@ -22,6 +23,7 @@ export const SOCIAL_PLATFORMS: { id: SocialKind; label: string }[] = [
   { id: "linkedin", label: "LinkedIn" },
   { id: "x", label: "X" },
   { id: "snapchat", label: "Snapchat" },
+  { id: "github", label: "GitHub" },
   { id: "website", label: "Website" },
 ];
 
@@ -35,6 +37,7 @@ export function detectSocialKind(platform: string, url = ""): SocialKind {
   if (text.includes("youtu")) return "youtube";
   if (text.includes("linked")) return "linkedin";
   if (text.includes("snap")) return "snapchat";
+  if (text.includes("github")) return "github";
   if (/(^|\s)x(\s|$)/.test(text) || text.includes("twitter") || text.includes("x.com")) return "x";
   return "website";
 }
@@ -90,6 +93,11 @@ export function socialHref(kind: SocialKind, url: string, username?: string) {
   if (kind === "snapchat") {
     if (/^https?:\/\//i.test(raw) || raw.includes("snapchat.com")) return websiteLink(raw);
     return `https://www.snapchat.com/add/${handle(username || raw)}`;
+  }
+
+  if (kind === "github") {
+    if (/^https?:\/\//i.test(raw) || raw.includes("github.com")) return websiteLink(raw);
+    return `https://github.com/${handle(username || raw)}`;
   }
 
   return websiteLink(raw);

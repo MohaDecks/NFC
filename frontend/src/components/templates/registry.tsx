@@ -50,13 +50,10 @@ export function ProfileRenderer({
             ? "engineer"
             : profile.type === "CAFETERIA"
               ? "cafeteria"
-              : profile.type === "PERSONAL" ||
-                  profile.type === "PROFESSIONAL" ||
-                  profile.type === "BUSINESS" ||
-                  profile.type === "ORGANIZATION" ||
-                  profile.type === "INDIVIDUAL_BUSINESS" ||
-                  profile.type === "PORTFOLIO"
-                ? "personal"
+              : profile.type === "PERSONAL" || profile.type === "PROFESSIONAL" || profile.type === "PORTFOLIO"
+                ? requested === "portfolio"
+                  ? "portfolio"
+                  : "personal"
                 : meta && (!isProfileType(profile.type) || meta.compatibleTypes.includes(profile.type as ProfileType))
                   ? requested
                   : defaultTemplateForType(profile.type);

@@ -57,7 +57,7 @@ export const SECTION_REGISTRY: Record<SectionType, { label: string; description:
 };
 
 export const TYPE_SECTION_PRESETS: Record<ProfileType, SectionType[]> = {
-  PERSONAL: ["hero", "about", "experience", "skills", "portfolio", "social", "contact", "location", "footer"],
+  PERSONAL: ["hero", "about", "skills", "portfolio", "experience", "services", "education", "certifications", "gallery", "social", "contact", "location", "footer"],
   INDIVIDUAL_BUSINESS: ["hero", "about", "services", "portfolio", "gallery", "social", "location", "contact", "footer"],
   BUSINESS: ["hero", "about", "services", "products", "gallery", "social", "location", "contact", "footer"],
   ORGANIZATION: ["hero", "about", "services", "gallery", "social", "location", "contact", "footer"],
@@ -66,6 +66,6 @@ export const TYPE_SECTION_PRESETS: Record<ProfileType, SectionType[]> = {
   CAFETERIA: ["hero", "about", "menu", "hours", "gallery", "location", "social", "contact", "footer"],
   DOCTOR: ["hero", "about", "specialization", "services", "experience", "education", "certifications", "location", "contact", "social", "cta", "footer"],
   ENGINEER: ["hero", "about", "specialization", "experience", "skills", "services", "portfolio", "social", "location", "contact", "footer"],
-  PROFESSIONAL: ["hero", "about", "specialization", "experience", "skills", "services", "portfolio", "social", "location", "contact", "footer"],
-  PORTFOLIO: ["hero", "about", "portfolio", "gallery", "skills", "social", "location", "contact", "footer"],
+  PROFESSIONAL: ["hero", "about", "skills", "portfolio", "experience", "services", "education", "certifications", "gallery", "social", "contact", "location", "footer"],
+  PORTFOLIO: ["hero", "about", "skills", "portfolio", "experience", "gallery", "social", "contact", "location", "footer"],
 };
