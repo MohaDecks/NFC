@@ -1,11 +1,11 @@
 import { MapPin } from "lucide-react";
 import type { PublicProfile } from "@/types";
-import { fullAddress } from "@/lib/media";
+import { realAddress } from "@/lib/location";
 import { mapsEmbedSrc, mapsLink } from "@/lib/utils";
 import { cardClass, mutedClass, sectionTitleClass, type PublicTone } from "./tone";
 
 export function LocationSection({ profile, tone }: { profile: PublicProfile; tone: PublicTone }) {
-  const address = fullAddress(profile.location);
+  const address = realAddress(profile.location);
   const maps = mapsLink(address, profile.location.mapsUrl, profile.location.latitude, profile.location.longitude);
   const embed = mapsEmbedSrc(address, profile.location.mapsUrl, profile.location.latitude, profile.location.longitude);
   if (!address && !maps) return null;
