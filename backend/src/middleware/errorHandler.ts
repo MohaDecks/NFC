@@ -52,12 +52,14 @@ export function errorHandler(
   }
 
   console.error(err);
-  return res.status(500).json({
+  const raw = err instanceof Error ? err.message : "";
+  const storeFailed = /EACCES|EPERM|ENOENT|ENOSPC|save this image|Cloudinary/i.test(raw);
+  return res.status(storeFailed ? 400 : 500).json({
     success: false,
-    message: "Something went wrong",
-    code: "INTERNAL_ERROR",
-    ...(env.NODE_ENV !== "production" && err instanceof Error
-      ? { debug: err.message }
-      : {}),
+    message: storeFailed
+      ? "Could not save this image. Try a JPG or PNG under 15MB."
+      : "Something went wrong",
+    code: storeFailed ? "STORE_FAILED" : "INTERNAL_ERROR",
+    ...(env.NODE_ENV !== "production" && raw ? { debug: raw } : {}),
   });
 }

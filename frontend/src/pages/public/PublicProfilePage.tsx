@@ -74,7 +74,7 @@ export function PublicProfilePage() {
         {image && <meta property="og:image" content={image.startsWith("http") ? image : `${window.location.origin}${image}`} />}
         <meta property="og:type" content="website" />
       </Helmet>
-      <div className="min-h-screen bg-[#F4F5F8]">
+      <div className="min-h-screen bg-white">
         <ScanArrival profile={profile} />
         <Suspense fallback={<Skeleton className="h-screen w-full rounded-none" />}>
           <ProfileRenderer profile={profile} template={profile.design.template} fullPage />

@@ -1,6 +1,11 @@
 import type { PublicProfile } from "@/types";
-import { EngineerPlace } from "@/components/public/EngineerPlace";
+import { HiHelloShell } from "@/components/public/HiHelloShell";
+import { PlaceExtras } from "@/components/public/PlaceExtras";
 
 export function EngineerTemplate({ profile }: { profile: PublicProfile }) {
-  return <EngineerPlace profile={profile} />;
+  return (
+    <HiHelloShell profile={profile} kindLabel="Engineer">
+      <PlaceExtras profile={profile} />
+    </HiHelloShell>
+  );
 }

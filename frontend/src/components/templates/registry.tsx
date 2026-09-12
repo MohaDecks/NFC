@@ -50,9 +50,16 @@ export function ProfileRenderer({
             ? "engineer"
             : profile.type === "CAFETERIA"
               ? "cafeteria"
-              : meta && (!isProfileType(profile.type) || meta.compatibleTypes.includes(profile.type as ProfileType))
-                ? requested
-                : defaultTemplateForType(profile.type);
+              : profile.type === "PERSONAL" ||
+                  profile.type === "PROFESSIONAL" ||
+                  profile.type === "BUSINESS" ||
+                  profile.type === "ORGANIZATION" ||
+                  profile.type === "INDIVIDUAL_BUSINESS" ||
+                  profile.type === "PORTFOLIO"
+                ? "personal"
+                : meta && (!isProfileType(profile.type) || meta.compatibleTypes.includes(profile.type as ProfileType))
+                  ? requested
+                  : defaultTemplateForType(profile.type);
   const Template = components[resolved] ?? ModernTemplate;
   const hasOwnChrome = ["food", "hotel", "doctor", "personal", "engineer", "cafeteria", "portfolio", "modern", "business", "luxury"].includes(resolved);
 

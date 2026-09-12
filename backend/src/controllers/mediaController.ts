@@ -36,66 +36,84 @@ function serializeMedia(media: InstanceType<typeof Media>) {
   };
 }
 
+async function attachToProfile(
+  profileId: string,
+  kind: "avatar" | "logo" | "cover" | "gallery",
+  mediaId: InstanceType<typeof Media>["_id"],
+) {
+  const update =
+    kind === "gallery" ? { $addToSet: { gallery: mediaId } } : { $set: { [kind]: mediaId } };
+  await Profile.updateOne({ _id: profileId }, update);
+  const doc = await Profile.findById(profileId).populate(["avatar", "logo", "cover", "gallery", "verifiedBy"]);
+  return doc ? serializeProfile(doc) : null;
+}
+
 export async function uploadMedia(req: Request, res: Response) {
   const { user } = req as AuthedRequest;
   const file = req.file;
-  if (!file) throw new AppError(400, "Choose an image to upload", "NO_FILE");
+  if (!file?.buffer?.length) {
+    throw new AppError(400, "Choose an image to upload", "NO_FILE");
+  }
 
   const kind = kinds.has(String(req.body.kind))
     ? (String(req.body.kind) as "avatar" | "logo" | "cover" | "gallery" | "menu" | "service" | "profile" | "room")
     : "gallery";
-  const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+  const originalName = String(file.originalname || "image.jpg").slice(0, 180);
+  const ext = path.extname(originalName).toLowerCase() || ".jpg";
   const mime = (file.mimetype || "").toLowerCase();
   const heic = mime.includes("heic") || mime.includes("heif") || /\.hei[cf]$/.test(ext);
   if (heic && !storage.cloudReady) {
-    throw new AppError(400, "This phone photo format needs JPG or PNG. Open the photo and export it as JPG.", "HEIC_UNSUPPORTED");
+    throw new AppError(
+      400,
+      "This phone photo format needs JPG or PNG. Open the photo and export it as JPG.",
+      "HEIC_UNSUPPORTED",
+    );
   }
   const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".avif"].includes(ext)
     ? ext
     : ".jpg";
   const filename = `${nanoid(16)}${safeExt}`;
+
   let stored;
   try {
     stored = await storage.save(filename, file.buffer);
   } catch (err) {
-    throw new AppError(
-      400,
-      err instanceof Error ? err.message : "Could not save this image. Try a JPG or PNG under 15MB.",
-      "STORE_FAILED",
-    );
+    console.error("Image store failed", err);
+    throw new AppError(400, "Could not save this image. Try a JPG or PNG under 15MB.", "STORE_FAILED");
   }
+
   const profileId = String(req.body.profileId || "");
   const linkedProfile = /^[a-f0-9]{24}$/i.test(profileId) ? profileId : null;
 
-  const media = await Media.create({
-    uploadedBy: user.id,
-    profile: linkedProfile,
-    filename: stored.filename,
-    originalName: file.originalname,
-    mimeType: file.mimetype,
-    size: file.size,
-    url: stored.url,
-    secureUrl: stored.secureUrl,
-    publicId: stored.publicId,
-    resourceType: stored.resourceType,
-    width: stored.width,
-    height: stored.height,
-    provider: stored.provider,
-    kind,
-  });
+  let media;
+  try {
+    media = await Media.create({
+      uploadedBy: user.id,
+      profile: linkedProfile,
+      filename: stored.filename,
+      originalName,
+      mimeType: file.mimetype || "image/jpeg",
+      size: file.size || file.buffer.length,
+      url: stored.url,
+      secureUrl: stored.secureUrl,
+      publicId: stored.publicId,
+      resourceType: stored.resourceType || "image",
+      width: stored.width || 0,
+      height: stored.height || 0,
+      provider: stored.provider,
+      kind,
+    });
+  } catch (err) {
+    console.error("Media document failed", err);
+    throw new AppError(400, "Could not save this image", "MEDIA_CREATE_FAILED");
+  }
 
   let profile = null;
   if (linkedProfile && (kind === "avatar" || kind === "logo" || kind === "cover" || kind === "gallery")) {
-    const doc = await Profile.findById(linkedProfile);
-    if (doc) {
-      if (kind === "gallery") {
-        doc.gallery = [...(doc.gallery ?? []), media._id];
-      } else {
-        doc.set(kind, media._id);
-      }
-      await doc.save();
-      await doc.populate(["avatar", "logo", "cover", "gallery", "verifiedBy"]);
-      profile = serializeProfile(doc);
+    try {
+      profile = await attachToProfile(linkedProfile, kind, media._id);
+    } catch (err) {
+      console.error("Image saved but profile attach failed", err);
     }
   }
 

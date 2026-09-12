@@ -5,7 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { env } from "../config/env";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const uploadsDir = path.resolve(__dirname, "../../uploads");
+export const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, "../../uploads"));
 
 export type StoredFile = {
   filename: string;
@@ -19,7 +19,7 @@ export type StoredFile = {
 };
 
 const cloudReady = Boolean(
-  env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET,
+  env.CLOUDINARY_CLOUD_NAME?.trim() && env.CLOUDINARY_API_KEY?.trim() && env.CLOUDINARY_API_SECRET?.trim(),
 );
 
 if (cloudReady) {
@@ -33,7 +33,7 @@ if (cloudReady) {
   cloudinary.config({ secure: true });
 }
 
-async function ensureUploadsDir() {
+export async function ensureUploadsDir() {
   await fs.mkdir(uploadsDir, { recursive: true });
 }
 

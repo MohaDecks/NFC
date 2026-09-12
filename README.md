@@ -64,3 +64,9 @@ Create it in **Profile Types**. Built-in types also live in `shared/profileTypes
 ## Adding a template later
 
 Add a component under `frontend/src/components/templates/` and register it in `registry.tsx` plus `TEMPLATE_REGISTRY`.
+
+
+  pull server 
+cd /var/www/html/NFC
+npm run deploy
+pm2 reload ecosystem.config.js --update-env

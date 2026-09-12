@@ -4,7 +4,7 @@ const mediaSchema = new Schema(
   {
     uploadedBy: { type: Schema.Types.ObjectId, ref: "Admin", required: true, index: true },
     profile: { type: Schema.Types.ObjectId, ref: "Profile", default: null, index: true },
-    originalName: { type: String, required: true },
+    originalName: { type: String, default: "image.jpg" },
     mimeType: { type: String, default: "" },
     size: { type: Number, default: 0 },
     url: { type: String, required: true },

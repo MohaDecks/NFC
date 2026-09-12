@@ -5,7 +5,16 @@ import type { PublicProfile } from "@/types";
 import { collectSocials } from "@/lib/collectSocials";
 import { mediaSrc } from "@/lib/media";
 import { buildVCard, downloadTextFile, websiteLink, whatsappLink } from "@/lib/utils";
-import { SOCIAL_COLORS, SocialBrandIcon } from "./SocialBrandIcon";
+import { SocialBrandIcon } from "./SocialBrandIcon";
+
+type Row = {
+  href: string;
+  label: string;
+  caption: string;
+  icon?: typeof Phone;
+  social?: ReturnType<typeof collectSocials>[number]["kind"];
+  external?: boolean;
+};
 
 export function HiHelloShell({
   profile,
@@ -25,8 +34,8 @@ export function HiHelloShell({
     kindLabel ||
     (brandName && brandName.toLowerCase() !== name.toLowerCase() ? brandName : "");
   const about = profile.description?.trim() || "";
-  const mark = profile.media.logoUrl || profile.media.avatarUrl;
-  const cover = profile.media.coverUrl;
+  const photo = profile.media.avatarUrl || profile.media.coverUrl;
+  const logo = profile.media.logoUrl && profile.media.logoUrl !== photo ? profile.media.logoUrl : null;
   const socials = collectSocials(profile);
   const phone = profile.contact.phone;
   const wa = whatsappLink(profile.contact.whatsapp || profile.contact.phone);
@@ -34,74 +43,68 @@ export function HiHelloShell({
   const site = websiteLink(profile.contact.website);
   const accent = profile.design.primaryColor || "#6D28D9";
 
-  const contacts = [
-    email ? { href: `mailto:${email}`, label: email, caption: "Email", icon: Mail } : null,
-    phone ? { href: `tel:${phone}`, label: phone, caption: "Phone", icon: Phone } : null,
-    wa ? { href: wa, label: profile.contact.whatsapp || phone, caption: "WhatsApp", icon: Phone, external: true } : null,
-    site ? { href: site, label: profile.contact.website, caption: "Website", icon: Globe, external: true } : null,
-  ].filter(Boolean) as { href: string; label: string; caption: string; icon: typeof Phone; external?: boolean }[];
+  const rows: Row[] = [
+    email ? { href: `mailto:${email}`, label: email, caption: "Personal", icon: Mail } : null,
+    phone ? { href: `tel:${phone}`, label: phone, caption: "Office", icon: Phone } : null,
+    profile.contact.whatsapp && profile.contact.whatsapp !== phone
+      ? { href: `tel:${profile.contact.whatsapp}`, label: profile.contact.whatsapp, caption: "Main", icon: Phone }
+      : null,
+    wa ? { href: wa, label: "WhatsApp", caption: "Message", social: "whatsapp" as const, external: true } : null,
+    site ? { href: site, label: profile.contact.website || "Website", caption: "Website", icon: Globe, external: true } : null,
+    ...socials
+      .filter((link) => link.kind !== "whatsapp")
+      .map((link) => ({
+        href: link.href,
+        label: link.label,
+        caption: link.label,
+        social: link.kind,
+        external: true,
+      })),
+  ].filter(Boolean) as Row[];
+
+  function saveContact() {
+    downloadTextFile(`${name}.vcf`, buildVCard(profile), "text/vcard");
+  }
 
   return (
-    <div className="min-h-[100svh] overflow-x-hidden bg-[#F6F7FB] text-[#111827]">
-      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-[430px] items-center justify-between gap-3 px-4">
-          <a href="#top" className="flex min-w-0 items-center gap-2">
-            {mark ? (
-              <img src={mediaSrc(mark, 80)} alt="" className="h-8 w-8 rounded-lg object-contain" />
-            ) : (
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold text-white" style={{ background: accent }}>
-                {name[0]}
-              </span>
-            )}
-            <span className="truncate text-sm font-semibold">{name}</span>
-          </a>
-          {phone ? (
-            <a href={`tel:${phone}`} className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white" style={{ background: accent }}>
-              Call
-            </a>
-          ) : wa ? (
-            <a href={wa} className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white" style={{ background: accent }}>
-              WhatsApp
-            </a>
-          ) : null}
-        </div>
-      </header>
-
-      <div id="top" className="relative overflow-hidden" style={{ background: accent }}>
-        {cover && <img src={mediaSrc(cover, 1600, "fill")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${accent} 0%, color-mix(in oklab, ${accent} 70%, #111827) 100%)` }} />
-        <div className="absolute inset-x-0 bottom-[-1px] h-[72px] bg-[#F6F7FB] [clip-path:ellipse(92%_100%_at_50%_100%)]" />
-        <div className="relative flex justify-center px-6 pb-16 pt-12">
-          {mark ? (
-            <img
-              src={mediaSrc(mark, 720)}
-              alt=""
-              className="max-h-40 w-auto max-w-[220px] rounded-[28px] bg-white object-contain p-2 shadow-[0_16px_40px_rgba(0,0,0,0.18)] ring-4 ring-white"
-            />
+    <div className="min-h-[100svh] w-full overflow-x-hidden bg-white text-[#111827]">
+      <div id="top" className="relative w-full">
+        <div className="h-[min(78vw,440px)] w-full overflow-hidden bg-[#1F2937]">
+          {photo ? (
+            <img src={mediaSrc(photo, 1600, "fill")} alt="" className="h-full w-full object-cover object-[center_20%]" />
           ) : (
-            <div
-              className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-white text-2xl font-semibold shadow-[0_16px_40px_rgba(0,0,0,0.18)] ring-4 ring-white"
-              style={{ color: accent }}
-            >
-              {name[0]}
+            <div className="flex h-full w-full items-end justify-center pb-16" style={{ background: `linear-gradient(180deg, ${accent} 0%, #111827 100%)` }}>
+              <span className="text-6xl font-semibold text-white/90">{name[0]}</span>
             </div>
+          )}
+        </div>
+        <svg className="absolute inset-x-0 -bottom-px h-16 w-full" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden>
+          <path d="M0 64C180 20 420 8 720 40C1020 72 1260 72 1440 28V80H0Z" fill="white" />
+        </svg>
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-end px-6">
+          {logo ? (
+            <img src={mediaSrc(logo, 200)} alt="" className="h-11 w-11 rounded-full bg-white object-contain p-1 shadow-sm ring-2 ring-white" />
+          ) : (
+            <span className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm ring-2 ring-white" style={{ background: accent }}>
+              {name[0]}
+            </span>
           )}
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[430px] px-5 pb-10">
-        <div className="text-center">
-          <h1 className="text-[30px] font-semibold leading-tight tracking-tight">{name}</h1>
-          {title && <p className="mt-1 text-[15px] text-[#6B7280]">{title}</p>}
+      <div className="mx-auto w-full max-w-[430px] px-6 pb-8">
+        <div className="pt-6 text-center">
+          <h1 className="text-[28px] font-semibold leading-tight tracking-tight">{name}</h1>
+          {title && <p className="mt-2 text-[16px] leading-6 text-[#6B7280]">{title}</p>}
           {company && (
-            <p className="mt-1 text-[15px] font-semibold" style={{ color: accent }}>
+            <p className="mt-1 text-[16px] font-medium leading-6" style={{ color: accent }}>
               {company}
             </p>
           )}
         </div>
 
         {about && (
-          <p className="mx-auto mt-6 max-w-[36ch] text-center text-[15px] leading-7 text-[#4B5563] whitespace-pre-line">
+          <p className="mt-7 text-[15px] leading-8 text-[#4B5563] whitespace-pre-line">
             {about}
           </p>
         )}
@@ -111,7 +114,7 @@ export function HiHelloShell({
             href={cta.href}
             target={cta.href.startsWith("http") ? "_blank" : undefined}
             rel={cta.href.startsWith("http") ? "noreferrer" : undefined}
-            className="mt-7 flex h-12 w-full items-center justify-center rounded-full text-[13px] font-semibold uppercase tracking-[0.16em] text-white shadow-sm"
+            className="mt-8 flex h-12 w-full items-center justify-center rounded-full text-[13px] font-semibold uppercase tracking-[0.14em] text-white"
             style={{ background: accent }}
           >
             {cta.label}
@@ -120,85 +123,58 @@ export function HiHelloShell({
 
         <button
           type="button"
-          onClick={() => downloadTextFile(`${name}.vcf`, buildVCard(profile), "text/vcard")}
-          className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#111827] text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
+          onClick={saveContact}
+          className="mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold uppercase tracking-[0.14em] text-white"
+          style={{ background: accent }}
+        >
+          <Download className="h-4 w-4" />
+          Save contact
+        </button>
+      </div>
+
+      {rows.length > 0 && (
+        <section className="mx-auto w-full max-w-[430px] px-6">
+          {rows.map((row) => {
+            const Icon = row.icon;
+            return (
+              <a
+                key={`${row.caption}-${row.label}-${row.href}`}
+                href={row.href}
+                target={row.external ? "_blank" : undefined}
+                rel={row.external ? "noreferrer" : undefined}
+                className="flex items-center gap-4 border-b border-[#F3F4F6] py-4"
+              >
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white" style={{ background: accent }}>
+                  {row.social ? <SocialBrandIcon kind={row.social} className="h-5 w-5" /> : Icon ? <Icon className="h-5 w-5" /> : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[16px] font-medium">{row.label}</span>
+                  <span className="mt-0.5 block text-[13px] capitalize text-[#9CA3AF]">{row.caption}</span>
+                </span>
+              </a>
+            );
+          })}
+        </section>
+      )}
+
+      <div className="mx-auto w-full max-w-[430px] px-6">
+        <button
+          type="button"
+          onClick={saveContact}
+          className="mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold uppercase tracking-[0.14em] text-white"
+          style={{ background: accent }}
         >
           <Download className="h-4 w-4" />
           Save contact
         </button>
 
-        {contacts.length > 0 && (
-          <section className="mt-8 overflow-hidden rounded-[24px] bg-white shadow-[0_10px_30px_rgba(17,24,39,0.05)]">
-            {contacts.map((row, index) => {
-              const Icon = row.icon;
-              return (
-                <a
-                  key={`${row.caption}-${row.label}`}
-                  href={row.href}
-                  target={row.external ? "_blank" : undefined}
-                  rel={row.external ? "noreferrer" : undefined}
-                  className={`flex items-center gap-3 px-4 py-3.5 ${index > 0 ? "border-t border-[#F3F4F6]" : ""}`}
-                >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full" style={{ background: `${accent}14`, color: accent }}>
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[15px] font-medium">{row.label}</span>
-                    <span className="text-[12px] text-[#9CA3AF]">{row.caption}</span>
-                  </span>
-                </a>
-              );
-            })}
-          </section>
-        )}
-
-        {socials.length > 0 && (
-          <section className="mt-6 flex flex-wrap justify-center gap-3">
-            {socials.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={link.label}
-                className="flex h-[52px] w-[52px] items-center justify-center rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition hover:-translate-y-0.5"
-                style={{
-                  background: SOCIAL_COLORS[link.kind],
-                  color: link.kind === "snapchat" ? "#111827" : "#fff",
-                }}
-              >
-                <SocialBrandIcon kind={link.kind} className="h-6 w-6" />
-              </a>
-            ))}
-          </section>
-        )}
-
-        <div className="overflow-hidden">{children}</div>
+        {children ? <div className="mt-10 overflow-hidden">{children}</div> : null}
       </div>
 
-      <footer className="mt-4 border-t border-black/5 bg-white">
-        <div className="mx-auto flex max-w-[430px] flex-col items-center gap-4 px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-          <p className="text-center text-sm font-semibold">{name}</p>
-          {title && <p className="-mt-2 text-center text-[12px] text-[#6B7280]">{title}</p>}
-          <div className="flex flex-wrap justify-center gap-2">
-            {phone && (
-              <a href={`tel:${phone}`} className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
-                Call
-              </a>
-            )}
-            {wa && (
-              <a href={wa} target="_blank" rel="noreferrer" className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
-                WhatsApp
-              </a>
-            )}
-            {email && (
-              <a href={`mailto:${email}`} className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
-                Email
-              </a>
-            )}
-          </div>
-          <p className="text-[11px] text-[#9CA3AF]">{brandName}</p>
-        </div>
+      <footer className="mt-10 w-full" style={{ background: accent }}>
+        <p className="px-6 py-3 text-center text-[12px] text-white/90">
+          {brandName ? `A digital business card from ${brandName}` : "Digital business card"}
+        </p>
       </footer>
     </div>
   );
