@@ -1,14 +1,11 @@
 import type { PublicProfile } from "@/types";
-import { PlaceShell } from "@/components/public/PlaceShell";
-import { ProfileBody } from "@/components/public/ProfileBody";
-import { pageClass } from "@/components/public/tone";
+import { HiHelloShell } from "@/components/public/HiHelloShell";
+import { PlaceExtras } from "@/components/public/PlaceExtras";
 
 export function BusinessTemplate({ profile }: { profile: PublicProfile }) {
   return (
-    <div className={pageClass("business")}>
-      <PlaceShell profile={profile} tone="business">
-        <ProfileBody profile={profile} tone="business" hideName compact />
-      </PlaceShell>
-    </div>
+    <HiHelloShell profile={profile}>
+      <PlaceExtras profile={profile} />
+    </HiHelloShell>
   );
 }

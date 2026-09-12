@@ -29,16 +29,27 @@ if (cloudReady) {
     api_secret: env.CLOUDINARY_API_SECRET,
     secure: true,
   });
+} else if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({ secure: true });
 }
 
 async function ensureUploadsDir() {
   await fs.mkdir(uploadsDir, { recursive: true });
 }
 
+function publicFileUrl(filename: string) {
+  const base = (env.APP_URL || "").replace(/\/$/, "");
+  const pathName = `/uploads/${filename}`;
+  if (base && !base.includes("localhost") && !base.includes("127.0.0.1")) {
+    return `${base}${pathName}`;
+  }
+  return pathName;
+}
+
 async function saveLocal(filename: string, buffer: Buffer): Promise<StoredFile> {
   await ensureUploadsDir();
   await fs.writeFile(path.join(uploadsDir, filename), buffer);
-  const url = `/uploads/${filename}`;
+  const url = publicFileUrl(filename);
   return {
     filename,
     url,
@@ -82,7 +93,13 @@ async function saveCloudinary(filename: string, buffer: Buffer): Promise<StoredF
 }
 
 export async function saveFile(filename: string, buffer: Buffer): Promise<StoredFile> {
-  if (cloudReady) return saveCloudinary(filename, buffer);
+  if (cloudReady || process.env.CLOUDINARY_URL) {
+    try {
+      return await saveCloudinary(filename, buffer);
+    } catch (err) {
+      console.error("Cloudinary upload failed, saving locally", err);
+    }
+  }
   return saveLocal(filename, buffer);
 }
 
@@ -99,5 +116,5 @@ export async function deleteFile(stored: { provider?: string; filename?: string;
 export const storage = {
   save: saveFile,
   delete: deleteFile,
-  cloudReady,
+  cloudReady: cloudReady || Boolean(process.env.CLOUDINARY_URL),
 };

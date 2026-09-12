@@ -63,13 +63,13 @@ export function ImageUpload({
         onClick={() => inputRef.current?.click()}
         className={cn(
           "relative flex w-full items-center justify-center overflow-hidden border border-dashed border-border bg-muted/40 text-muted-foreground transition hover:border-primary/40 hover:bg-muted",
-          aspect === "wide" && "h-40 rounded-xl",
-          aspect === "square" && "h-36 w-36 rounded-xl",
-          aspect === "circle" && "h-28 w-28 rounded-full",
+          aspect === "wide" && "min-h-40 rounded-xl p-3",
+          aspect === "square" && "min-h-36 w-full max-w-56 rounded-xl p-3",
+          aspect === "circle" && "min-h-32 w-full max-w-56 rounded-[28px] p-3",
         )}
       >
         {previewUrl ? (
-          <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+          <img src={previewUrl} alt={label} className="max-h-44 w-auto max-w-full object-contain" />
         ) : (
           <span className="flex flex-col items-center gap-2 text-xs">
             {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImagePlus className="h-5 w-5" />}
@@ -85,7 +85,7 @@ export function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
+        accept="image/*"
         className="hidden"
         onChange={(e) => void onFile(e.target.files?.[0])}
       />

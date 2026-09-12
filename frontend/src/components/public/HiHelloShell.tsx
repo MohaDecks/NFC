@@ -26,56 +26,68 @@ export function HiHelloShell({
     (brandName && brandName.toLowerCase() !== name.toLowerCase() ? brandName : "");
   const about = profile.description?.trim() || "";
   const mark = profile.media.logoUrl || profile.media.avatarUrl;
+  const cover = profile.media.coverUrl;
   const socials = collectSocials(profile);
   const phone = profile.contact.phone;
   const wa = whatsappLink(profile.contact.whatsapp || profile.contact.phone);
   const email = profile.contact.email;
   const site = websiteLink(profile.contact.website);
-  const accent = profile.design.primaryColor || "#7C3AED";
+  const accent = profile.design.primaryColor || "#6D28D9";
 
   const contacts = [
-    email ? { href: `mailto:${email}`, label: email, caption: "personal", icon: Mail } : null,
-    phone ? { href: `tel:${phone}`, label: phone, caption: "office", icon: Phone } : null,
-    profile.contact.whatsapp && wa
-      ? { href: wa, label: profile.contact.whatsapp, caption: "whatsapp", icon: Phone, external: true }
-      : null,
-    site ? { href: site, label: profile.contact.website, caption: "website", icon: Globe, external: true } : null,
+    email ? { href: `mailto:${email}`, label: email, caption: "Email", icon: Mail } : null,
+    phone ? { href: `tel:${phone}`, label: phone, caption: "Phone", icon: Phone } : null,
+    wa ? { href: wa, label: profile.contact.whatsapp || phone, caption: "WhatsApp", icon: Phone, external: true } : null,
+    site ? { href: site, label: profile.contact.website, caption: "Website", icon: Globe, external: true } : null,
   ].filter(Boolean) as { href: string; label: string; caption: string; icon: typeof Phone; external?: boolean }[];
 
   return (
-    <div className="min-h-[100svh] bg-[#F4F5F8] text-[#111827]">
+    <div className="min-h-[100svh] bg-[#F6F7FB] text-[#111827]">
       <div className="relative overflow-hidden" style={{ background: accent }}>
-        <div className="absolute inset-x-0 bottom-[-1px] h-16 bg-[#F4F5F8] [clip-path:ellipse(80%_100%_at_50%_100%)]" />
-        <div className="flex justify-center px-6 pb-14 pt-10">
+        {cover && <img src={mediaSrc(cover, 1600, "fill")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />}
+        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${accent} 0%, color-mix(in oklab, ${accent} 70%, #111827) 100%)` }} />
+        <div className="absolute inset-x-0 bottom-[-1px] h-[72px] bg-[#F6F7FB] [clip-path:ellipse(92%_100%_at_50%_100%)]" />
+        <div className="relative flex justify-center px-6 pb-16 pt-12">
           {mark ? (
-            <img src={mediaSrc(mark, 220)} alt="" className="h-16 w-16 rounded-full bg-white object-contain p-1 shadow-sm" />
+            <img
+              src={mediaSrc(mark, 720)}
+              alt=""
+              className="max-h-40 w-auto max-w-[220px] rounded-[28px] bg-white object-contain p-2 shadow-[0_16px_40px_rgba(0,0,0,0.18)] ring-4 ring-white"
+            />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-lg font-semibold" style={{ color: accent }}>
+            <div
+              className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-white text-2xl font-semibold shadow-[0_16px_40px_rgba(0,0,0,0.18)] ring-4 ring-white"
+              style={{ color: accent }}
+            >
               {name[0]}
             </div>
           )}
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[430px] px-6 pb-16">
-        <div className="border-l-[3px] pl-4" style={{ borderColor: accent }}>
-          <h1 className="text-[28px] font-semibold leading-tight tracking-tight">{name}</h1>
+      <div className="mx-auto w-full max-w-[430px] px-5 pb-20">
+        <div className="text-center">
+          <h1 className="text-[30px] font-semibold leading-tight tracking-tight">{name}</h1>
           {title && <p className="mt-1 text-[15px] text-[#6B7280]">{title}</p>}
           {company && (
-            <p className="mt-1 text-[15px] font-medium" style={{ color: accent }}>
+            <p className="mt-1 text-[15px] font-semibold" style={{ color: accent }}>
               {company}
             </p>
           )}
         </div>
 
-        {about && <p className="mt-6 whitespace-pre-line text-[15px] leading-7 text-[#374151]">{about}</p>}
+        {about && (
+          <p className="mx-auto mt-6 max-w-[36ch] text-center text-[15px] leading-7 text-[#4B5563] whitespace-pre-line">
+            {about}
+          </p>
+        )}
 
         {cta && (
           <a
             href={cta.href}
             target={cta.href.startsWith("http") ? "_blank" : undefined}
             rel={cta.href.startsWith("http") ? "noreferrer" : undefined}
-            className="mt-7 flex h-12 w-full items-center justify-center rounded-full text-[13px] font-semibold uppercase tracking-[0.14em] text-white"
+            className="mt-7 flex h-12 w-full items-center justify-center rounded-full text-[13px] font-semibold uppercase tracking-[0.16em] text-white shadow-sm"
             style={{ background: accent }}
           >
             {cta.label}
@@ -85,15 +97,15 @@ export function HiHelloShell({
         <button
           type="button"
           onClick={() => downloadTextFile(`${name}.vcf`, buildVCard(profile), "text/vcard")}
-          className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#111827] text-[13px] font-semibold uppercase tracking-[0.14em] text-white"
+          className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#111827] text-[13px] font-semibold uppercase tracking-[0.16em] text-white"
         >
           <Download className="h-4 w-4" />
           Save contact
         </button>
 
         {contacts.length > 0 && (
-          <section className="mt-8 space-y-1">
-            {contacts.map((row) => {
+          <section className="mt-8 overflow-hidden rounded-[24px] bg-white shadow-[0_10px_30px_rgba(17,24,39,0.05)]">
+            {contacts.map((row, index) => {
               const Icon = row.icon;
               return (
                 <a
@@ -101,9 +113,9 @@ export function HiHelloShell({
                   href={row.href}
                   target={row.external ? "_blank" : undefined}
                   rel={row.external ? "noreferrer" : undefined}
-                  className="flex items-center gap-3 rounded-2xl px-2 py-3 hover:bg-white"
+                  className={`flex items-center gap-3 px-4 py-3.5 ${index > 0 ? "border-t border-[#F3F4F6]" : ""}`}
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm" style={{ color: accent }}>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full" style={{ background: `${accent}14`, color: accent }}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
@@ -117,47 +129,23 @@ export function HiHelloShell({
         )}
 
         {socials.length > 0 && (
-          <section className="mt-6">
-            <div className="flex flex-wrap justify-center gap-3">
-              {socials.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={link.label}
-                  className="flex h-12 w-12 items-center justify-center rounded-full shadow-sm transition hover:-translate-y-0.5"
-                  style={{
-                    background: SOCIAL_COLORS[link.kind],
-                    color: link.kind === "snapchat" ? "#111827" : "#fff",
-                  }}
-                >
-                  <SocialBrandIcon kind={link.kind} className="h-6 w-6" />
-                </a>
-              ))}
-            </div>
-            <div className="mt-3 space-y-1">
-              {socials.map((link) => (
-                <a
-                  key={`row-${link.href}`}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 rounded-2xl px-2 py-3 hover:bg-white"
-                >
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-full"
-                    style={{
-                      background: SOCIAL_COLORS[link.kind],
-                      color: link.kind === "snapchat" ? "#111827" : "#fff",
-                    }}
-                  >
-                    <SocialBrandIcon kind={link.kind} className="h-5 w-5" />
-                  </span>
-                  <span className="text-[15px] font-medium">{link.label}</span>
-                </a>
-              ))}
-            </div>
+          <section className="mt-6 flex flex-wrap justify-center gap-3">
+            {socials.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={link.label}
+                className="flex h-[52px] w-[52px] items-center justify-center rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition hover:-translate-y-0.5"
+                style={{
+                  background: SOCIAL_COLORS[link.kind],
+                  color: link.kind === "snapchat" ? "#111827" : "#fff",
+                }}
+              >
+                <SocialBrandIcon kind={link.kind} className="h-6 w-6" />
+              </a>
+            ))}
           </section>
         )}
 

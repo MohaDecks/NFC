@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
+import multer from "multer";
 import { AppError } from "../utils/AppError";
 import { env } from "../config/env";
 
@@ -17,6 +18,15 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
+  if (err instanceof multer.MulterError) {
+    const tooBig = err.code === "LIMIT_FILE_SIZE";
+    return res.status(400).json({
+      success: false,
+      message: tooBig ? "Image is too large. Use a photo under 15MB." : "Could not upload this image.",
+      code: tooBig ? "FILE_TOO_LARGE" : "UPLOAD_ERROR",
+    });
+  }
+
   if (err instanceof AppError) {
     return res.status(err.status).json({
       success: false,

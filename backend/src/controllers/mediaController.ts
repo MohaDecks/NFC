@@ -44,7 +44,9 @@ export async function uploadMedia(req: Request, res: Response) {
     ? (String(req.body.kind) as "avatar" | "logo" | "cover" | "gallery" | "menu" | "service" | "profile" | "room")
     : "gallery";
   const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
-  const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(ext) ? ext : ".jpg";
+  const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".avif"].includes(ext)
+    ? ext
+    : ".jpg";
   const filename = `${nanoid(16)}${safeExt}`;
   const stored = await storage.save(filename, file.buffer);
 

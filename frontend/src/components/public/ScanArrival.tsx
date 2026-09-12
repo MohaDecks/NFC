@@ -46,7 +46,7 @@ export function ScanArrival({ profile }: { profile: PublicProfile }) {
       className="scan-banner fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-50 mx-auto flex max-w-md items-center gap-3 rounded-[22px] border border-black/5 bg-white/95 px-3 py-3 text-left shadow-[0_18px_50px_rgba(15,23,42,0.18)] backdrop-blur-xl"
     >
       {photo ? (
-        <img src={mediaSrc(photo, 120)} alt="" className="h-12 w-12 rounded-2xl object-cover" />
+        <img src={mediaSrc(photo, 160)} alt="" className="h-12 w-12 rounded-2xl object-contain bg-[#F3F4F6]" />
       ) : (
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl text-white" style={{ background: "var(--p, #6D28D9)" }}>
           <Nfc className="h-5 w-5" />

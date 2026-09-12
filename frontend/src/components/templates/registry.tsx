@@ -54,7 +54,7 @@ export function ProfileRenderer({
                 ? requested
                 : defaultTemplateForType(profile.type);
   const Template = components[resolved] ?? ModernTemplate;
-  const hasOwnChrome = ["food", "hotel", "doctor", "personal", "engineer", "cafeteria", "portfolio"].includes(resolved);
+  const hasOwnChrome = ["food", "hotel", "doctor", "personal", "engineer", "cafeteria", "portfolio", "modern", "business", "luxury"].includes(resolved);
 
   return (
     <ThemeFrame design={profile.design} className={className}>
