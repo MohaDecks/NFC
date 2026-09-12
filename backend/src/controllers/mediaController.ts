@@ -50,6 +50,7 @@ async function attachToProfile(
 
 export async function uploadMedia(req: Request, res: Response) {
   const { user } = req as AuthedRequest;
+  if (!user?.id) throw new AppError(401, "Please sign in", "UNAUTHORIZED");
   const file = req.file;
   if (!file?.buffer?.length) {
     throw new AppError(400, "Choose an image to upload", "NO_FILE");

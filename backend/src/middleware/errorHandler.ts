@@ -14,7 +14,7 @@ export function notFound(_req: Request, res: Response) {
 
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ) {
@@ -53,13 +53,19 @@ export function errorHandler(
 
   console.error(err);
   const raw = err instanceof Error ? err.message : "";
+  const uploadRoute = req.originalUrl?.includes("/media/upload") || req.originalUrl?.includes("/branding/logo");
   const storeFailed = /EACCES|EPERM|ENOENT|ENOSPC|save this image|Cloudinary/i.test(raw);
-  return res.status(storeFailed ? 400 : 500).json({
+  if (uploadRoute || storeFailed) {
+    return res.status(400).json({
+      success: false,
+      message: raw && raw.length < 180 ? raw : "Could not save this image. Try a JPG or PNG under 15MB.",
+      code: "STORE_FAILED",
+    });
+  }
+  return res.status(500).json({
     success: false,
-    message: storeFailed
-      ? "Could not save this image. Try a JPG or PNG under 15MB."
-      : "Something went wrong",
-    code: storeFailed ? "STORE_FAILED" : "INTERNAL_ERROR",
+    message: "Something went wrong",
+    code: "INTERNAL_ERROR",
     ...(env.NODE_ENV !== "production" && raw ? { debug: raw } : {}),
   });
 }

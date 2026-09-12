@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit";
 import { asyncHandler } from "../utils/asyncHandler";
 import { validate } from "../middleware/validate";
 import { requireAdmin, requirePermission } from "../middleware/auth";
-import { upload } from "../middleware/upload";
+import { upload, uploadImage } from "../middleware/upload";
 import {
   adminAccountSchema,
   categorySchema,
@@ -161,7 +161,7 @@ adminRouter.patch("/services/:id", requirePermission("content.edit"), validate(s
 adminRouter.delete("/services/:id", requirePermission("content.delete"), asyncHandler(deleteService));
 
 adminRouter.get("/media", requirePermission("media.view"), asyncHandler(listMedia));
-adminRouter.post("/media/upload", requirePermission("media.upload"), upload.single("file"), asyncHandler(uploadMedia));
+adminRouter.post("/media/upload", requirePermission("media.upload"), uploadImage, asyncHandler(uploadMedia));
 adminRouter.delete("/media/:id", requirePermission("media.delete"), asyncHandler(deleteMedia));
 
 adminRouter.get("/users", requirePermission("users.view"), asyncHandler(listAdmins));

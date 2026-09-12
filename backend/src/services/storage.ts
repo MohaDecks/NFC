@@ -1,11 +1,37 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "../config/env";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(__dirname, "../../uploads"));
+
+function resolveUploadsDir() {
+  const candidates = [
+    process.env.UPLOADS_DIR,
+    path.resolve(__dirname, "../../uploads"),
+    path.resolve(process.cwd(), "uploads"),
+    "/var/tmp/nfc-uploads",
+    "/tmp/nfc-uploads",
+  ].filter((dir): dir is string => Boolean(dir));
+
+  for (const dir of candidates) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.accessSync(dir, fs.constants.W_OK);
+      const probe = path.join(dir, ".write-ok");
+      fs.writeFileSync(probe, "ok");
+      fs.unlinkSync(probe);
+      return path.resolve(dir);
+    } catch (err) {
+      console.error("Uploads dir not writable", dir, err);
+    }
+  }
+  return path.resolve("/tmp/nfc-uploads");
+}
+
+export const uploadsDir = resolveUploadsDir();
 
 export type StoredFile = {
   filename: string;
@@ -18,23 +44,25 @@ export type StoredFile = {
   provider: "cloudinary" | "local";
 };
 
+const cloudSecret = env.CLOUDINARY_API_SECRET?.trim() || "";
 const cloudReady = Boolean(
-  env.CLOUDINARY_CLOUD_NAME?.trim() && env.CLOUDINARY_API_KEY?.trim() && env.CLOUDINARY_API_SECRET?.trim(),
+  env.CLOUDINARY_CLOUD_NAME?.trim() && env.CLOUDINARY_API_KEY?.trim() && cloudSecret.length >= 8,
 );
+const cloudinaryUrl = process.env.CLOUDINARY_URL?.startsWith("cloudinary://") ? process.env.CLOUDINARY_URL : "";
 
 if (cloudReady) {
   cloudinary.config({
     cloud_name: env.CLOUDINARY_CLOUD_NAME,
     api_key: env.CLOUDINARY_API_KEY,
-    api_secret: env.CLOUDINARY_API_SECRET,
+    api_secret: cloudSecret,
     secure: true,
   });
-} else if (process.env.CLOUDINARY_URL) {
+} else if (cloudinaryUrl) {
   cloudinary.config({ secure: true });
 }
 
 export async function ensureUploadsDir() {
-  await fs.mkdir(uploadsDir, { recursive: true });
+  await fsPromises.mkdir(uploadsDir, { recursive: true });
 }
 
 function publicFileUrl(filename: string) {
@@ -47,13 +75,8 @@ function publicFileUrl(filename: string) {
 }
 
 async function saveLocal(filename: string, buffer: Buffer): Promise<StoredFile> {
-  try {
-    await ensureUploadsDir();
-    await fs.writeFile(path.join(uploadsDir, filename), buffer);
-  } catch (err) {
-    console.error("Local image save failed", err);
-    throw new Error("Could not save this image on the server");
-  }
+  await ensureUploadsDir();
+  await fsPromises.writeFile(path.join(uploadsDir, filename), buffer);
   const url = publicFileUrl(filename);
   return {
     filename,
@@ -75,14 +98,18 @@ async function saveCloudinary(filename: string, buffer: Buffer): Promise<StoredF
     width: number;
     height: number;
   }>((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "mubarek", public_id: filename.replace(path.extname(filename), ""), resource_type: "image" },
-      (error, upload) => {
-        if (error || !upload) reject(error ?? new Error("Cloudinary upload failed"));
-        else resolve(upload as never);
-      },
-    );
-    stream.end(buffer);
+    try {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "mubarek", public_id: filename.replace(path.extname(filename), ""), resource_type: "image" },
+        (error, upload) => {
+          if (error || !upload) reject(error ?? new Error("Cloudinary upload failed"));
+          else resolve(upload as never);
+        },
+      );
+      stream.end(buffer);
+    } catch (err) {
+      reject(err);
+    }
   });
 
   return {
@@ -98,7 +125,7 @@ async function saveCloudinary(filename: string, buffer: Buffer): Promise<StoredF
 }
 
 export async function saveFile(filename: string, buffer: Buffer): Promise<StoredFile> {
-  if (cloudReady || process.env.CLOUDINARY_URL) {
+  if (cloudReady || cloudinaryUrl) {
     try {
       return await saveCloudinary(filename, buffer);
     } catch (err) {
@@ -114,12 +141,12 @@ export async function deleteFile(stored: { provider?: string; filename?: string;
     return;
   }
   if (stored.filename) {
-    await fs.unlink(path.join(uploadsDir, stored.filename)).catch(() => undefined);
+    await fsPromises.unlink(path.join(uploadsDir, stored.filename)).catch(() => undefined);
   }
 }
 
 export const storage = {
   save: saveFile,
   delete: deleteFile,
-  cloudReady: cloudReady || Boolean(process.env.CLOUDINARY_URL),
+  cloudReady: cloudReady || Boolean(cloudinaryUrl),
 };
