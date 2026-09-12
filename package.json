@@ -1,0 +1,17 @@
+{
+  "name": "bravio",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix backend",
+    "start": "npm run build --prefix frontend && NODE_ENV=production npm start --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "install:server": "npm --prefix backend install && npm --prefix frontend install",
+    "deploy": "bash scripts/deploy.sh",
+    "server:update": "bash scripts/server-update.sh",
+    "setup:domain": "bash scripts/setup-domain.sh",
+    "pm2:start": "bash scripts/pm2.sh start",
+    "pm2:reload": "bash scripts/pm2.sh reload",
+    "pm2:list": "bash -c '${PM2_CMD:-pm2} list'",
+    "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend"
+  }
+}

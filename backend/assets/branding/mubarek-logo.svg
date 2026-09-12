@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 720" fill="none">
+  <title>MUBAREK TECHNOLOGY SOLUTION</title>
+  <circle cx="320" cy="168" r="132" fill="#0D47A1"/>
+  <circle cx="320" cy="168" r="118" fill="#1565C0"/>
+  <path d="M248 230 V112 L320 184 L392 112 V230" stroke="#FFFFFF" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M392 98c28 18 42 42 42 70s-14 52-42 70" stroke="#90CAF9" stroke-width="8" stroke-linecap="round"/>
+  <path d="M410 118c18 14 27 30 27 50s-9 36-27 50" stroke="#BBDEFB" stroke-width="6" stroke-linecap="round"/>
+  <text x="320" y="380" text-anchor="middle" fill="#0D47A1" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="4">MUBAREK</text>
+  <text x="320" y="434" text-anchor="middle" fill="#1565C0" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="3">TECHNOLOGY SOLUTION</text>
+  <text x="320" y="500" text-anchor="middle" fill="#1565C0" font-family="Noto Sans Ethiopic, Abyssinica SIL, Arial, sans-serif" font-size="28" font-weight="600">c(­ t­– 6	=•</text>
+  <text x="320" y="560" text-anchor="middle" fill="#5B7FA6" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500">Your All-In-One Technology</text>
+</svg>
