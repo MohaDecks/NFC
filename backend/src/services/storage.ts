@@ -47,8 +47,13 @@ function publicFileUrl(filename: string) {
 }
 
 async function saveLocal(filename: string, buffer: Buffer): Promise<StoredFile> {
-  await ensureUploadsDir();
-  await fs.writeFile(path.join(uploadsDir, filename), buffer);
+  try {
+    await ensureUploadsDir();
+    await fs.writeFile(path.join(uploadsDir, filename), buffer);
+  } catch (err) {
+    console.error("Local image save failed", err);
+    throw new Error("Could not save this image on the server");
+  }
   const url = publicFileUrl(filename);
   return {
     filename,

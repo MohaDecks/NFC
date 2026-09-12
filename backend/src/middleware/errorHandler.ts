@@ -35,7 +35,7 @@ export function errorHandler(
     });
   }
 
-  if (err instanceof mongoose.Error.ValidationError) {
+  if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
     return res.status(400).json({
       success: false,
       message: "Invalid data",

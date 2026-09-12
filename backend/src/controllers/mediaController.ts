@@ -8,6 +8,7 @@ import { created, ok } from "../utils/response";
 import type { AuthedRequest } from "../middleware/auth";
 import { storage } from "../services/storage";
 import { routeParam } from "../utils/params";
+import { serializeProfile } from "../services/profileService";
 
 const kinds = new Set(["avatar", "logo", "cover", "gallery", "menu", "service", "profile", "room"]);
 
@@ -44,15 +45,31 @@ export async function uploadMedia(req: Request, res: Response) {
     ? (String(req.body.kind) as "avatar" | "logo" | "cover" | "gallery" | "menu" | "service" | "profile" | "room")
     : "gallery";
   const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
+  const mime = (file.mimetype || "").toLowerCase();
+  const heic = mime.includes("heic") || mime.includes("heif") || /\.hei[cf]$/.test(ext);
+  if (heic && !storage.cloudReady) {
+    throw new AppError(400, "This phone photo format needs JPG or PNG. Open the photo and export it as JPG.", "HEIC_UNSUPPORTED");
+  }
   const safeExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif", ".avif"].includes(ext)
     ? ext
     : ".jpg";
   const filename = `${nanoid(16)}${safeExt}`;
-  const stored = await storage.save(filename, file.buffer);
+  let stored;
+  try {
+    stored = await storage.save(filename, file.buffer);
+  } catch (err) {
+    throw new AppError(
+      400,
+      err instanceof Error ? err.message : "Could not save this image. Try a JPG or PNG under 15MB.",
+      "STORE_FAILED",
+    );
+  }
+  const profileId = String(req.body.profileId || "");
+  const linkedProfile = /^[a-f0-9]{24}$/i.test(profileId) ? profileId : null;
 
   const media = await Media.create({
     uploadedBy: user.id,
-    profile: req.body.profileId || null,
+    profile: linkedProfile,
     filename: stored.filename,
     originalName: file.originalname,
     mimeType: file.mimetype,
@@ -67,7 +84,22 @@ export async function uploadMedia(req: Request, res: Response) {
     kind,
   });
 
-  return created(res, { media: serializeMedia(media) });
+  let profile = null;
+  if (linkedProfile && (kind === "avatar" || kind === "logo" || kind === "cover" || kind === "gallery")) {
+    const doc = await Profile.findById(linkedProfile);
+    if (doc) {
+      if (kind === "gallery") {
+        doc.gallery = [...(doc.gallery ?? []), media._id];
+      } else {
+        doc.set(kind, media._id);
+      }
+      await doc.save();
+      await doc.populate(["avatar", "logo", "cover", "gallery", "verifiedBy"]);
+      profile = serializeProfile(doc);
+    }
+  }
+
+  return created(res, { media: serializeMedia(media), profile });
 }
 
 export async function listMedia(req: Request, res: Response) {

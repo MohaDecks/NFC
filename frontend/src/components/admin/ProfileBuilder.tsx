@@ -263,17 +263,22 @@ function SectionEditor({
             label="Add gallery image"
             kind="gallery"
             profileId={profile.id}
+            onProfile={onProfile}
             onChange={async (media) => {
               if (!media) return;
-              const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, {
-                gallery: [...profile.gallery, media.id],
-              });
-              onProfile(data.profile);
+              try {
+                const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, {
+                  gallery: [...profile.gallery, media.id],
+                });
+                onProfile(data.profile);
+              } catch (err) {
+                toast.error(friendlyError(err, "Could not save this image"));
+              }
             }}
           />
           <div className="grid grid-cols-3 gap-3">
             {profile.galleryUrls.map((url, index) => (
-              <img key={`${url}-${index}`} src={url} alt="" className="h-20 w-full rounded-xl object-cover" />
+              <img key={`${url}-${index}`} src={url} alt="" className="h-20 w-full overflow-hidden rounded-xl object-cover" />
             ))}
           </div>
         </div>
@@ -397,8 +402,12 @@ function RoomsEditor({ profileId }: { profileId: string }) {
               previewUrl={room.imageUrls[0]}
               onChange={async (media) => {
                 if (!media) return;
-                await api.patch(`/api/admin/rooms/${room.id}`, { images: [...(room.images ?? []), media.id] });
-                await load();
+                try {
+                  await api.patch(`/api/admin/rooms/${room.id}`, { images: [...(room.images ?? []), media.id] });
+                  await load();
+                } catch (err) {
+                  toast.error(friendlyError(err, "Could not save this image"));
+                }
               }}
             />
           </div>

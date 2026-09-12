@@ -42,8 +42,32 @@ export function HiHelloShell({
   ].filter(Boolean) as { href: string; label: string; caption: string; icon: typeof Phone; external?: boolean }[];
 
   return (
-    <div className="min-h-[100svh] bg-[#F6F7FB] text-[#111827]">
-      <div className="relative overflow-hidden" style={{ background: accent }}>
+    <div className="min-h-[100svh] overflow-x-hidden bg-[#F6F7FB] text-[#111827]">
+      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-[430px] items-center justify-between gap-3 px-4">
+          <a href="#top" className="flex min-w-0 items-center gap-2">
+            {mark ? (
+              <img src={mediaSrc(mark, 80)} alt="" className="h-8 w-8 rounded-lg object-contain" />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold text-white" style={{ background: accent }}>
+                {name[0]}
+              </span>
+            )}
+            <span className="truncate text-sm font-semibold">{name}</span>
+          </a>
+          {phone ? (
+            <a href={`tel:${phone}`} className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white" style={{ background: accent }}>
+              Call
+            </a>
+          ) : wa ? (
+            <a href={wa} className="shrink-0 rounded-full px-3 py-1.5 text-[12px] font-semibold text-white" style={{ background: accent }}>
+              WhatsApp
+            </a>
+          ) : null}
+        </div>
+      </header>
+
+      <div id="top" className="relative overflow-hidden" style={{ background: accent }}>
         {cover && <img src={mediaSrc(cover, 1600, "fill")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />}
         <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${accent} 0%, color-mix(in oklab, ${accent} 70%, #111827) 100%)` }} />
         <div className="absolute inset-x-0 bottom-[-1px] h-[72px] bg-[#F6F7FB] [clip-path:ellipse(92%_100%_at_50%_100%)]" />
@@ -65,7 +89,7 @@ export function HiHelloShell({
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[430px] px-5 pb-20">
+      <div className="mx-auto w-full max-w-[430px] px-5 pb-10">
         <div className="text-center">
           <h1 className="text-[30px] font-semibold leading-tight tracking-tight">{name}</h1>
           {title && <p className="mt-1 text-[15px] text-[#6B7280]">{title}</p>}
@@ -149,8 +173,33 @@ export function HiHelloShell({
           </section>
         )}
 
-        {children}
+        <div className="overflow-hidden">{children}</div>
       </div>
+
+      <footer className="mt-4 border-t border-black/5 bg-white">
+        <div className="mx-auto flex max-w-[430px] flex-col items-center gap-4 px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <p className="text-center text-sm font-semibold">{name}</p>
+          {title && <p className="-mt-2 text-center text-[12px] text-[#6B7280]">{title}</p>}
+          <div className="flex flex-wrap justify-center gap-2">
+            {phone && (
+              <a href={`tel:${phone}`} className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
+                Call
+              </a>
+            )}
+            {wa && (
+              <a href={wa} target="_blank" rel="noreferrer" className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
+                WhatsApp
+              </a>
+            )}
+            {email && (
+              <a href={`mailto:${email}`} className="rounded-full bg-[#F3F4F6] px-3 py-1.5 text-[12px] font-medium">
+                Email
+              </a>
+            )}
+          </div>
+          <p className="text-[11px] text-[#9CA3AF]">{brandName}</p>
+        </div>
+      </footer>
     </div>
   );
 }

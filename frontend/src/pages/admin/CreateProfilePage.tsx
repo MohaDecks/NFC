@@ -212,13 +212,51 @@ export function CreateProfilePage() {
                   <h2 className="mb-4 text-sm font-semibold">Images</h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {features.avatar && (
-                      <ImageUpload label="Profile image" kind="avatar" aspect="circle" profileId={profile.id} previewUrl={profile.avatarUrl} onChange={(media) => void api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { avatar: media?.id ?? null }).then((data) => setProfile(data.profile))} />
+                      <ImageUpload
+                        label="Profile image"
+                        kind="avatar"
+                        aspect="circle"
+                        profileId={profile.id}
+                        previewUrl={profile.avatarUrl}
+                        onProfile={setProfile}
+                        onChange={(media) =>
+                          void api
+                            .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { avatar: media?.id ?? null })
+                            .then((data) => setProfile(data.profile))
+                            .catch((err) => toast.error(friendlyError(err, "Could not save this image")))
+                        }
+                      />
                     )}
                     {features.logo && (
-                      <ImageUpload label="Logo" kind="logo" aspect="square" profileId={profile.id} previewUrl={profile.logoUrl} onChange={(media) => void api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { logo: media?.id ?? null }).then((data) => setProfile(data.profile))} />
+                      <ImageUpload
+                        label="Logo"
+                        kind="logo"
+                        aspect="square"
+                        profileId={profile.id}
+                        previewUrl={profile.logoUrl}
+                        onProfile={setProfile}
+                        onChange={(media) =>
+                          void api
+                            .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { logo: media?.id ?? null })
+                            .then((data) => setProfile(data.profile))
+                            .catch((err) => toast.error(friendlyError(err, "Could not save this image")))
+                        }
+                      />
                     )}
                     <div className="sm:col-span-2">
-                      <ImageUpload label="Cover / welcome image" kind="cover" profileId={profile.id} previewUrl={profile.coverUrl} onChange={(media) => void api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { cover: media?.id ?? null }).then((data) => setProfile(data.profile))} />
+                      <ImageUpload
+                        label="Cover / welcome image"
+                        kind="cover"
+                        profileId={profile.id}
+                        previewUrl={profile.coverUrl}
+                        onProfile={setProfile}
+                        onChange={(media) =>
+                          void api
+                            .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { cover: media?.id ?? null })
+                            .then((data) => setProfile(data.profile))
+                            .catch((err) => toast.error(friendlyError(err, "Could not save this image")))
+                        }
+                      />
                     </div>
                   </div>
                 </Card>

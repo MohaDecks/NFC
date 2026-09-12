@@ -329,10 +329,33 @@ function ContentTab({ profile, onChange }: { profile: AdminProfile; onChange: (p
   );
 }
 
+async function attachImage(
+  profileId: string,
+  field: "avatar" | "logo" | "cover" | "gallery",
+  media: { id: string } | null,
+  gallery: string[],
+) {
+  const body =
+    field === "gallery"
+      ? { gallery: media ? [...gallery, media.id] : gallery }
+      : { [field]: media?.id ?? null };
+  const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profileId}`, body);
+  return data.profile;
+}
+
 function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: AdminProfile) => void }) {
   const features = resolveProfileType(profile.type).features;
+
+  async function saveField(field: "avatar" | "logo" | "cover" | "gallery", media: { id: string } | null) {
+    try {
+      onChange(await attachImage(profile.id, field, media, profile.gallery));
+    } catch (err) {
+      toast.error(friendlyError(err, "Could not save this image"));
+    }
+  }
+
   return (
-    <div className="grid gap-6 rounded-2xl border bg-white p-6 sm:grid-cols-2">
+    <div className="grid gap-6 overflow-hidden rounded-2xl border bg-white p-6 sm:grid-cols-2">
       {features.avatar && (
         <ImageUpload
           label="Profile image"
@@ -340,11 +363,8 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
           aspect="circle"
           profileId={profile.id}
           previewUrl={profile.avatarUrl}
-          onChange={(media) =>
-            void api
-              .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { avatar: media?.id ?? null })
-              .then((d) => onChange(d.profile))
-          }
+          onProfile={onChange}
+          onChange={(media) => void saveField("avatar", media)}
         />
       )}
       {features.logo && (
@@ -354,11 +374,8 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
           aspect="square"
           profileId={profile.id}
           previewUrl={profile.logoUrl}
-          onChange={(media) =>
-            void api
-              .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { logo: media?.id ?? null })
-              .then((d) => onChange(d.profile))
-          }
+          onProfile={onChange}
+          onChange={(media) => void saveField("logo", media)}
         />
       )}
       <div className="sm:col-span-2">
@@ -367,11 +384,8 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
           kind="cover"
           profileId={profile.id}
           previewUrl={profile.coverUrl}
-          onChange={(media) =>
-            void api
-              .patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { cover: media?.id ?? null })
-              .then((d) => onChange(d.profile))
-          }
+          onProfile={onChange}
+          onChange={(media) => void saveField("cover", media)}
         />
       </div>
       <div className="sm:col-span-2">
@@ -379,25 +393,27 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
           label="Add gallery image"
           kind="gallery"
           profileId={profile.id}
-          onChange={async (media) => {
+          onProfile={onChange}
+          onChange={(media) => {
             if (!media) return;
-            const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, {
-              gallery: [...profile.gallery, media.id],
-            });
-            onChange(data.profile);
+            void saveField("gallery", media);
           }}
         />
         <div className="mt-4 grid grid-cols-3 gap-3">
           {profile.galleryUrls.map((url, index) => (
-            <div key={`${url}-${index}`} className="relative">
-              <img src={url} alt="" className="h-28 w-full rounded-xl object-cover" />
+            <div key={`${url}-${index}`} className="relative overflow-hidden rounded-xl">
+              <img src={url} alt="" className="h-28 w-full object-cover" />
               <button
                 type="button"
                 className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white"
                 onClick={async () => {
-                  const next = profile.gallery.filter((_, i) => i !== index);
-                  const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { gallery: next });
-                  onChange(data.profile);
+                  try {
+                    const next = profile.gallery.filter((_, i) => i !== index);
+                    const data = await api.patch<{ profile: AdminProfile }>(`/api/admin/profiles/${profile.id}`, { gallery: next });
+                    onChange(data.profile);
+                  } catch (err) {
+                    toast.error(friendlyError(err, "Could not remove image"));
+                  }
                 }}
               >
                 Remove
