@@ -23,8 +23,9 @@ function seriesFrom(keys: string[], rows: { _id: string; count: number }[]) {
   return keys.map((day) => ({ day, count: map.get(day) ?? 0 }));
 }
 
-export async function getDashboard(_req: Request, res: Response) {
-  const days = utcDayKeys(7);
+export async function getDashboard(req: Request, res: Response) {
+  const span = Number(req.query.days) === 30 ? 30 : 7;
+  const days = utcDayKeys(span);
   const since = new Date(`${days[0]}T00:00:00.000Z`);
   const [
     total,
@@ -48,11 +49,13 @@ export async function getDashboard(_req: Request, res: Response) {
     published,
     drafts,
     nfcCards,
+    activeCards,
     qrCodes,
     profileTypes,
     cardDesigns,
     createdRows,
     viewRows,
+    typeRows,
   ] = await Promise.all([
     Profile.countDocuments(),
     Profile.countDocuments({ status: "ACTIVE" }),
@@ -75,6 +78,7 @@ export async function getDashboard(_req: Request, res: Response) {
     Profile.countDocuments({ publishState: "PUBLISHED", status: "ACTIVE" }),
     Profile.countDocuments({ publishState: "DRAFT" }),
     NFCCard.countDocuments(),
+    NFCCard.countDocuments({ status: "ACTIVE" }),
     NFCCard.countDocuments({ qrEnabled: true }),
     ProfileType.find({ status: "ACTIVE" }).sort({ name: 1 }).limit(12),
     CardDesign.find({ status: "ACTIVE" }).sort({ name: 1 }).limit(8),
@@ -86,6 +90,7 @@ export async function getDashboard(_req: Request, res: Response) {
       { $match: { viewedAt: { $gte: since } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$viewedAt", timezone: "UTC" } }, count: { $sum: 1 } } },
     ]),
+    Profile.aggregate<{ _id: string; count: number }>([{ $group: { _id: "$type", count: { $sum: 1 } } }]),
   ]);
 
   return ok(res, {
@@ -107,11 +112,14 @@ export async function getDashboard(_req: Request, res: Response) {
       published,
       drafts,
       nfcCards,
+      activeCards,
       qrCodes,
       views,
     },
+    rangeDays: span,
     growth: seriesFrom(days, createdRows),
     viewsByDay: seriesFrom(days, viewRows),
+    typeCounts: Object.fromEntries(typeRows.map((row) => [String(row._id), row.count])),
     recentlyUpdated: recentlyUpdated.map(serializeProfile),
     profileTypes: profileTypes.map((item) => ({ id: item.id, name: item.name, slug: item.slug })),
     cardDesigns: cardDesigns.map((item) => ({
