@@ -29,7 +29,7 @@ export function CardDesigner({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
-      <div className="space-y-4 rounded-2xl border bg-white p-4">
+      <div className="space-y-4 rounded-2xl border bg-card p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Card presets</p>
         <div className="grid gap-2">
           {CARD_PRESET_IDS.map((id) => (
@@ -85,7 +85,7 @@ export function CardDesigner({
         {onSave && <Button onClick={onSave}>Save card design</Button>}
       </div>
       <div className="space-y-4">
-        <div className="flex justify-center rounded-[28px] bg-[#F7F8FC] py-8">
+        <div className="flex justify-center rounded-3xl bg-muted py-8">
           <FlipNfcCard
             title={design.logoSource === "brand" ? brandName : profile.name}
             subtitle={design.frontText || "Digital Business Card"}

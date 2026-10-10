@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConnectionCard } from "@/components/admin/ConnectionCard";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { CardDesigner } from "@/components/admin/CardDesigner";
 import { useAdmin } from "@/hooks/useAdmin";
 import { defaultCardDesignForType } from "@shared/cardDesign";
@@ -45,7 +46,7 @@ export function MenusHubPage() {
   return (
     <Page title="Menus" hint="Every restaurant and cafeteria menu — compact rows with photo and price.">
       {Object.values(groups).map((group) => (
-        <div key={group.id || group.name} className="rounded-xl border bg-white p-4">
+        <div key={group.id || group.name} className="rounded-xl border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold">{group.name}</h2>
             {group.id && (
@@ -80,7 +81,7 @@ export function RoomsHubPage() {
   return (
     <Page title="Rooms" hint="Hotel rooms across every property. Open a profile to edit photos, beds, and prices.">
       {rooms.map((room) => (
-        <div key={room.id} className="flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3">
+        <div key={room.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
           <div>
             <p className="text-sm font-medium">{room.name}</p>
             <p className="text-xs text-muted-foreground">{room.profileName}</p>
@@ -141,7 +142,7 @@ export function ServicesHubPage() {
   return (
     <Page title="Services" hint="Hotel services across the platform.">
       {services.map((s) => (
-        <div key={s.id} className="flex justify-between rounded-xl border bg-white px-4 py-3">
+        <div key={s.id} className="flex justify-between rounded-xl border bg-card px-4 py-3">
           <span>{s.name}</span>
           <span className="text-sm text-muted-foreground">{s.profileName}</span>
         </div>
@@ -161,7 +162,7 @@ export function MediaLibraryPage() {
   useEffect(() => { void load(); }, [kind]);
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-3xl">Media</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Media</h1>
       <div className="flex gap-2">
         {[
           ["", "All"],
@@ -178,7 +179,7 @@ export function MediaLibraryPage() {
       </div>
       <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {media.map((item) => (
-          <div key={item.id} className="overflow-hidden rounded-xl border bg-white">
+          <div key={item.id} className="overflow-hidden rounded-xl border bg-card">
             <img src={item.url} alt="" className="h-28 w-full object-cover" />
             <div className="p-2">
               <p className="truncate text-[11px] text-muted-foreground">{item.profileName || item.kind}</p>
@@ -197,7 +198,7 @@ export function MediaLibraryPage() {
 export function ThemesPage() {
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-3xl">Themes</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Themes</h1>
       <p className="text-sm text-muted-foreground">
         Colors, fonts, and button styles live on each profile. Open a profile workspace and use the Design tab to customize them with live preview.
       </p>
@@ -220,7 +221,7 @@ export function ThemesPage() {
 export function TemplatesPage() {
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-3xl">Templates</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
       <div className="grid gap-4 md:grid-cols-2">
         {Object.values(TEMPLATE_REGISTRY).map((t) => (
           <Card key={t.id}>
@@ -259,7 +260,7 @@ function ConnectionGrid({ title, hint, profiles }: { title: string; hint: string
         ))}
       </div>
       {profiles.length === 0 && (
-        <div className="rounded-2xl border border-dashed bg-white py-16 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed bg-card py-16 text-center text-sm text-muted-foreground">
           No profiles yet. Create one to generate an NFC / QR URL.
         </div>
       )}
@@ -272,7 +273,7 @@ export function AnalyticsHubPage() {
   useEffect(() => { void api.get<AnalyticsSummary & { activeProfiles?: number }>("/api/admin/analytics").then(setStats); }, []);
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-3xl">Analytics</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>
       <div className="grid gap-4 md:grid-cols-5">
         <Stat label="Total views" value={stats?.totalViews ?? 0} />
         <Stat label="Today" value={stats?.viewsToday ?? 0} />
@@ -290,17 +291,38 @@ export function SettingsPage() {
   const [email, setEmail] = useState(admin?.email ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const more = [
+    can("users.view") && { to: "/admin/users", label: "Users" },
+    can("roles.view") && { to: "/admin/roles", label: "Roles" },
+    can("roles.view") && { to: "/admin/permissions", label: "Permissions" },
+    can("types.view") && { to: "/admin/profile-types", label: "Profile types" },
+    can("settings.view") && { to: "/admin/settings/branding", label: "Branding" },
+    can("audit.view") && { to: "/admin/audit", label: "Audit logs" },
+    can("content.view") && { to: "/admin/content/menus", label: "Menus" },
+    can("content.view") && { to: "/admin/content/rooms", label: "Rooms" },
+    can("content.view") && { to: "/admin/content/services", label: "Services" },
+    can("content.view") && { to: "/admin/content/sections", label: "Sections" },
+    can("design.view") && { to: "/admin/design/templates", label: "Templates" },
+    can("design.view") && { to: "/admin/design/themes", label: "Themes" },
+    can("nfc.view") && { to: "/admin/connections/nfc", label: "NFC" },
+    can("types.view") && { to: "/admin/business-cards/types", label: "Card types" },
+    can("locations.view") && { to: "/admin/locations/cities", label: "Cities" },
+  ].filter((item): item is { to: string; label: string } => Boolean(item));
   return (
-    <div className="mx-auto max-w-lg space-y-4">
+    <div className="mx-auto max-w-3xl space-y-4">
       <div>
-        <h1 className="font-serif text-3xl">Profile</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">{admin?.role?.name ?? "Admin"}</p>
-        {can("settings.view") && (
-          <Button className="mt-3 rounded-full" variant="outline" asChild>
-            <Link to="/admin/settings/branding">Open branding</Link>
-          </Button>
-        )}
       </div>
+      {more.length > 0 && (
+        <div className="grid gap-2 sm:grid-cols-3">
+          {more.map((item) => (
+            <Link key={item.to} to={item.to} className="rounded-2xl border bg-card px-4 py-3 text-sm font-medium shadow-[var(--shadow-card)] hover:border-primary/30">
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
       <Card>
         <CardContent className="space-y-4 p-6">
           <div className="space-y-2"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
@@ -342,10 +364,10 @@ export function AuditPage() {
   }, []);
   return (
     <div className="space-y-4">
-      <h1 className="font-serif text-3xl">Audit logs</h1>
-      <div className="overflow-hidden rounded-2xl border bg-white">
+      <h1 className="text-2xl font-semibold tracking-tight">Audit logs</h1>
+      <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-[#f7f4ee] text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
             <tr><th className="px-4 py-3">Admin</th><th>Action</th><th>Target</th><th>Date</th></tr>
           </thead>
           <tbody>
@@ -367,10 +389,7 @@ export function AuditPage() {
 function Page({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="font-serif text-3xl">{title}</h1>
-        <p className="text-sm text-muted-foreground">{hint}</p>
-      </div>
+      <PageHeader title={title} description={hint} />
       <div className="space-y-2">{children}</div>
     </div>
   );
@@ -381,7 +400,7 @@ function Stat({ label, value }: { label: string; value: number }) {
     <Card>
       <CardContent className="p-5">
         <p className="text-xs uppercase text-muted-foreground">{label}</p>
-        <p className="mt-2 font-serif text-3xl">{value}</p>
+        <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
       </CardContent>
     </Card>
   );

@@ -36,7 +36,7 @@ export function CountiesPage() {
       </div>
       {can("locations.create") && (
         <form
-          className="flex flex-wrap items-end gap-3 rounded-[22px] border border-[#EEEFF3] bg-white p-4"
+          className="flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4"
           onSubmit={async (event) => {
             event.preventDefault();
             try {
@@ -70,7 +70,7 @@ export function CountiesPage() {
             <Label>Flag</Label>
             <Input value={flag} onChange={(e) => setFlag(e.target.value)} placeholder="🇪🇹" />
           </div>
-          <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]">{editing ? "Save" : "+ Add Country"}</Button>
+          <Button className="rounded-full bg-primary hover:bg-primary/90">{editing ? "Save" : "+ Add Country"}</Button>
           {editing && (
             <Button type="button" variant="outline" className="rounded-full" onClick={() => { setEditing(null); setName(""); }}>
               Cancel
@@ -78,7 +78,7 @@ export function CountiesPage() {
           )}
         </form>
       )}
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -100,7 +100,7 @@ export function CountiesPage() {
                 <td className={row.status === "ACTIVE" ? "text-emerald-600" : "text-slate-400"}>{row.status === "ACTIVE" ? "Active" : "Inactive"}</td>
                 <td className="pr-5 text-right">
                   {can("locations.edit") && (
-                    <button type="button" className="mr-2 text-[#1565C0]" onClick={() => { setEditing(row); setName(row.name); setCode(row.code ?? ""); setIsoCode(row.isoCode ?? ""); setFlag(row.flag ?? ""); }}>
+                    <button type="button" className="mr-2 text-primary" onClick={() => { setEditing(row); setName(row.name); setCode(row.code ?? ""); setIsoCode(row.isoCode ?? ""); setFlag(row.flag ?? ""); }}>
                       <Pencil className="h-4 w-4" />
                     </button>
                   )}
@@ -160,7 +160,7 @@ export function CitiesPage() {
       </div>
       {can("locations.create") && (
         <form
-          className="grid gap-3 rounded-[22px] border border-[#EEEFF3] bg-white p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          className="grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
           onSubmit={async (event) => {
             event.preventDefault();
             try {
@@ -186,14 +186,14 @@ export function CitiesPage() {
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="City name" required />
           </div>
           <div className="flex gap-2">
-            <Button className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]">{editing ? "Save" : "+ Add City"}</Button>
+            <Button className="rounded-full bg-primary hover:bg-primary/90">{editing ? "Save" : "+ Add City"}</Button>
             {editing && (
               <Button type="button" variant="outline" className="rounded-full" onClick={() => { setEditing(null); setName(""); }}>Cancel</Button>
             )}
           </div>
         </form>
       )}
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -211,7 +211,7 @@ export function CitiesPage() {
                 <td className={row.status === "ACTIVE" ? "text-emerald-600" : "text-slate-400"}>{row.status === "ACTIVE" ? "Active" : "Inactive"}</td>
                 <td className="pr-5 text-right">
                   {can("locations.edit") && (
-                    <button type="button" className="mr-2 text-[#5b5ce6]" onClick={() => { setEditing(row); setName(row.name); setCountyId(row.countyId); }}>
+                    <button type="button" className="mr-2 text-primary" onClick={() => { setEditing(row); setName(row.name); setCountyId(row.countyId); }}>
                       <Pencil className="h-4 w-4" />
                     </button>
                   )}

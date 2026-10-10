@@ -83,7 +83,7 @@ export function RegisterBusinessCardPage() {
             Register a digital business card. Choose the type from the dropdown — Personal, Hotel, Cafeteria, Engineer, and any types you add under Card Types.
           </p>
         </div>
-        <div className="space-y-5 rounded-[22px] border border-[#EEEFF3] bg-white p-5">
+        <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
           <div className="space-y-2">
             <Label>Card type *</Label>
             <select
@@ -107,7 +107,7 @@ export function RegisterBusinessCardPage() {
             <Field label="Email" value={email} onChange={setEmail} />
             <Field label="Website" value={website} onChange={setWebsite} />
           </div>
-          <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]" disabled={busy} onClick={() => void submit()}>
+          <Button className="rounded-full bg-primary hover:bg-primary/90" disabled={busy} onClick={() => void submit()}>
             Register business card
           </Button>
         </div>

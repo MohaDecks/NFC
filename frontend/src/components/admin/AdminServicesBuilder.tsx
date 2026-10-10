@@ -44,7 +44,7 @@ export function AdminServicesBuilder({ profileId }: { profileId: string }) {
         </Button>
       </div>
       {services.length === 0 ? (
-        <div className="rounded-2xl border bg-white p-10 text-center">
+        <div className="rounded-2xl border bg-card p-10 text-center">
           <p className="font-medium">No services yet</p>
           <p className="mt-1 text-sm text-muted-foreground">Add the experiences guests should see on the public page.</p>
         </div>
@@ -54,7 +54,7 @@ export function AdminServicesBuilder({ profileId }: { profileId: string }) {
             <button
               key={service.id}
               type="button"
-              className="rounded-2xl border bg-white p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#1b6b5a]/20 hover:shadow-lg"
+              className="rounded-2xl border bg-card p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg"
               onClick={() => {
                 setEditing(service);
                 setOpen(true);

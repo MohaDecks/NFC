@@ -13,7 +13,7 @@ export function RequirePermission({
   const needed = Array.isArray(permission) ? permission : [permission];
   if (!needed.some((item) => can(item))) {
     return (
-      <div className="rounded-2xl border bg-white p-8 text-sm text-muted-foreground">
+      <div className="rounded-2xl border bg-card p-8 text-sm text-muted-foreground">
         You do not have permission to view this page.
       </div>
     );

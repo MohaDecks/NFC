@@ -50,7 +50,7 @@ export function AdminLoginPage() {
         <p className="relative text-sm text-white/35">{tagline}</p>
       </div>
       <div className="flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(21,101,192,0.14),transparent_32%)] px-6 py-12">
-        <form className="w-full max-w-sm space-y-4 rounded-3xl border bg-white p-6 shadow-sm" onSubmit={(e) => void onSubmit(e)}>
+        <form className="w-full max-w-sm space-y-4 rounded-3xl border bg-card p-6 shadow-sm" onSubmit={(e) => void onSubmit(e)}>
           <div className="lg:hidden">
             <BrandLogo showText compact imgClassName="h-10 w-auto" />
           </div>
@@ -64,7 +64,7 @@ export function AdminLoginPage() {
             <Label>Password</Label>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          <Button className="w-full bg-[#1565C0] hover:bg-[#0D47A1]" disabled={busy}>
+          <Button className="w-full bg-primary hover:bg-primary/90" disabled={busy}>
             {busy ? "Signing in..." : "Enter admin"}
           </Button>
         </form>

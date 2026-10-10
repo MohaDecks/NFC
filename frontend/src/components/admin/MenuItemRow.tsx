@@ -17,7 +17,7 @@ export function MenuItemRow({
       {item.imageUrl ? (
         <img src={item.imageUrl} alt="" className="h-10 w-10 rounded-md object-cover" />
       ) : (
-        <div className="h-10 w-10 rounded-md bg-[#1b6b5a]/10" />
+        <div className="h-10 w-10 rounded-md bg-primary/10" />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Activity, BadgeCheck, Building2, Coffee, CreditCard, Eye, Hotel, MapPin, Plus, Shield, UserPlus, UserRound, UtensilsCrossed } from "lucide-react";
+import { Activity, BadgeCheck, Building2, Coffee, CreditCard, Eye, FileEdit, Hotel, MapPin, Plus, QrCode, Shield, Stethoscope, UserPlus, UserRound, UtensilsCrossed, Wrench } from "lucide-react";
 import { typeLabel } from "@shared/profileTypes";
 import { FlipNfcCard } from "@/components/admin/FlipNfcCard";
 import { useBranding } from "@/hooks/useBranding";
@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PublishBadge, StatusBadge, VerifiedBadge } from "@/components/admin/StatusBadges";
 import { useAdmin } from "@/hooks/useAdmin";
 import type { AdminProfile, AuditItem } from "@/types";
+
+type DayPoint = { day: string; count: number };
 
 type DashboardData = {
   stats: {
@@ -24,10 +26,17 @@ type DashboardData = {
     hotels: number;
     restaurants: number;
     cafeterias: number;
+    doctors?: number;
+    engineers?: number;
+    portfolios?: number;
     published: number;
+    drafts?: number;
     nfcCards: number;
+    qrCodes?: number;
     views: number;
   };
+  growth?: DayPoint[];
+  viewsByDay?: DayPoint[];
   profileTypes?: { id: string; name: string; slug: string }[];
   cardDesigns?: {
     id: string;
@@ -39,126 +48,172 @@ type DashboardData = {
     backText: string;
   }[];
   recentProfiles: AdminProfile[];
+  recentlyUpdated?: AdminProfile[];
   recentActivity: AuditItem[];
 };
 
 export function DashboardPage() {
-  const { can, admin } = useAdmin();
+  const { can } = useAdmin();
   const { brandName, tagline } = useBranding();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState("");
+  const [list, setList] = useState<"recent" | "updated">("recent");
 
   useEffect(() => {
-    void api.get<DashboardData>("/api/admin/dashboard").then(setData);
+    void api
+      .get<DashboardData>("/api/admin/dashboard")
+      .then(setData)
+      .catch(() => setError("Dashboard data could not be loaded."));
   }, []);
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-sm text-muted-foreground">{error}</CardContent>
+      </Card>
+    );
+  }
 
   if (!data) {
     return (
       <div className="grid gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-28 rounded-3xl" />)}
+        {Array.from({ length: 8 }).map((_, index) => <Skeleton key={index} className="h-28 rounded-2xl" />)}
       </div>
     );
   }
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const { stats } = data;
   const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+  const profiles = list === "updated" ? data.recentlyUpdated ?? data.recentProfiles : data.recentProfiles;
+  const distribution = [
+    { label: "Personal", value: stats.personal },
+    { label: "Businesses", value: stats.businesses },
+    { label: "Hotels", value: stats.hotels },
+    { label: "Restaurants", value: stats.restaurants },
+    { label: "Cafeterias", value: stats.cafeterias },
+    { label: "Doctors", value: stats.doctors ?? 0 },
+    { label: "Engineers", value: stats.engineers ?? 0 },
+    { label: "Portfolios", value: stats.portfolios ?? 0 },
+  ].filter((item) => item.value > 0);
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#5b5ce6_0%,#7c3aed_52%,#2563eb_100%)] p-6 text-white shadow-[0_20px_50px_rgba(91,92,230,0.22)] md:p-7">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[13px] text-white/70">{today}</p>
-            <p className="text-[12px] uppercase tracking-[0.2em] text-white/60">{brandName}</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-[34px]">
-              Create. Connect. Grow.
-            </h1>
-            <p className="mt-2 max-w-xl text-sm text-white/75">
-              {greeting}, {admin?.name ?? "Admin"}. {tagline} — Digital Presence Platform.
-            </p>
-          </div>
-          {can("profiles.create") && (
-            <Button asChild className="h-10 rounded-full bg-white px-5 text-[#1565C0] hover:bg-blue-50">
-              <Link to="/admin/profiles/new"><Plus className="h-4 w-4" /> Create Profile</Link>
-            </Button>
-          )}
-        </div>
-      </section>
+      <p className="text-sm text-muted-foreground">{today}{tagline ? ` · ${tagline}` : ""}</p>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        {can("profiles.create") && <QuickAction to="/admin/profiles/new" icon={Plus} label="Create Profile" />}
-        {can("nfc.manage") && <QuickAction to="/admin/business-cards/register" icon={CreditCard} label="Register Business Card" />}
-        {can("types.create") && <QuickAction to="/admin/profile-types" icon={Shield} label="Add Profile Type" />}
-        {can("locations.create") && <QuickAction to="/admin/locations/countries" icon={MapPin} label="Add Country" />}
-        {can("locations.create") && <QuickAction to="/admin/locations/cities" icon={MapPin} label="Add City" />}
-        {can("users.create") && <QuickAction to="/admin/users/new" icon={UserPlus} label="Create Admin" />}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Kpi icon={UserRound} label="Total Profiles" value={stats.total} hint={`${stats.active} active · ${stats.inactive} inactive`} />
+        <Kpi icon={BadgeCheck} label="Verified" value={stats.verified} hint={`${stats.unverified} unverified`} />
+        <Kpi icon={Activity} label="Published" value={stats.published ?? 0} hint="Live public websites" />
+        <Kpi icon={FileEdit} label="Drafts" value={stats.drafts ?? 0} hint="Not published" />
+        <Kpi icon={CreditCard} label="Business Cards" value={stats.nfcCards ?? 0} hint="Registered NFC cards" />
+        <Kpi icon={QrCode} label="QR Codes" value={stats.qrCodes ?? stats.nfcCards ?? 0} hint="Cards with QR enabled" />
+        <Kpi icon={Eye} label="Profile Views" value={stats.views} hint="All recorded views" />
+        <Kpi icon={Building2} label="Businesses" value={stats.businesses} hint={`${stats.personal} personal profiles`} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <Stat icon={UserRound} label="Total Profiles" value={stats.total} hint="All workspaces" color="bg-violet-50 text-violet-700" />
-        <Stat icon={Activity} label="Active Profiles" value={stats.active} hint={`${stats.inactive} inactive`} color="bg-cyan-50 text-cyan-700" />
-        <Stat icon={BadgeCheck} label="Verified Profiles" value={stats.verified} hint={`${stats.unverified} unverified`} color="bg-pink-50 text-pink-700" />
-        <Stat icon={Building2} label="Published" value={stats.published ?? 0} hint="Live websites" color="bg-emerald-50 text-emerald-700" />
-        <Stat icon={CreditCard} label="Business Cards" value={stats.nfcCards ?? 0} hint="Registered cards" color="bg-blue-50 text-blue-700" />
-        <Stat icon={Eye} label="Profile Views" value={stats.views} hint="All time" color="bg-amber-50 text-amber-700" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {can("profiles.create") && <QuickAction to="/admin/profiles/new" icon={Plus} label="Create Profile" />}
+        {can("nfc.manage") && <QuickAction to="/admin/business-cards/register" icon={CreditCard} label="Register Card" />}
+        {can("profiles.view") && <QuickAction to="/admin/profiles" icon={UserRound} label="All Profiles" />}
+        {can("analytics.view") && <QuickAction to="/admin/analytics" icon={Eye} label="Insights" />}
+        {can("locations.create") && <QuickAction to="/admin/locations/countries" icon={MapPin} label="Add Country" />}
+        {can("users.create") && <QuickAction to="/admin/users/new" icon={UserPlus} label="Create Admin" />}
+        {can("types.create") && <QuickAction to="/admin/profile-types" icon={Shield} label="Profile Types" />}
+        {can("design.view") && <QuickAction to="/admin/design/templates" icon={FileEdit} label="Templates" />}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+        <Card>
+          <CardContent className="p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-semibold">Last 7 days</h2>
+                <p className="text-sm text-muted-foreground">Profiles created and public views.</p>
+              </div>
+            </div>
+            <TrendChart created={data.growth ?? []} views={data.viewsByDay ?? []} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <h2 className="font-semibold">Profile types</h2>
+            <p className="mb-4 text-sm text-muted-foreground">Counts from the profile collection.</p>
+            {distribution.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No profiles yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {distribution.map((item) => (
+                  <div key={item.label}>
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span>{item.label}</span>
+                      <span className="text-muted-foreground">{item.value}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${Math.max(6, (item.value / Math.max(stats.total, 1)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <TypeTile to="/admin/profiles?type=PERSONAL" icon={UserRound} label="Personal" value={stats.personal} />
+        <TypeTile to="/admin/profiles?kind=business" icon={Building2} label="Businesses" value={stats.businesses} />
+        <TypeTile to="/admin/profiles?type=HOTEL" icon={Hotel} label="Hotels" value={stats.hotels} />
+        <TypeTile to="/admin/profiles?type=RESTAURANT" icon={UtensilsCrossed} label="Restaurants" value={stats.restaurants} />
+        <TypeTile to="/admin/profiles?type=CAFETERIA" icon={Coffee} label="Cafeterias" value={stats.cafeterias} />
+        <TypeTile to="/admin/profiles?type=DOCTOR" icon={Stethoscope} label="Doctors" value={stats.doctors ?? 0} />
+        <TypeTile to="/admin/profiles?type=ENGINEER" icon={Wrench} label="Engineers" value={stats.engineers ?? 0} />
+        <TypeTile to="/admin/profiles?type=PORTFOLIO" icon={FileEdit} label="Portfolios" value={stats.portfolios ?? 0} />
       </div>
 
       {(data.cardDesigns?.length ?? 0) > 0 && (
-        <section className="rounded-[24px] border border-[#EEEFF3] bg-white p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold">Card Designs</h2>
-              <p className="text-sm text-muted-foreground">Click a card to flip front and back.</p>
-            </div>
-            <Link to="/admin/design/card-designs" className="text-sm text-[#1565C0]">Open designer</Link>
-          </div>
-          <div className="flex gap-6 overflow-x-auto pb-4 pt-2">
-            {data.cardDesigns?.map((design) => (
-              <div key={design.id} className="shrink-0">
-                <p className="mb-2 text-xs font-medium text-slate-500">{design.name}</p>
-                <FlipNfcCard
-                  title={brandName}
-                  design={design}
-                />
+        <Card>
+          <CardContent className="p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold">Card designs</h2>
+                <p className="text-sm text-muted-foreground">Click a card to flip front and back.</p>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <TypeTile to="/admin/profiles?type=PERSONAL" icon={UserRound} label="Personal" value={stats.personal} tone="bg-[#EEF0F4] text-[#5b6472]" />
-        <TypeTile to="/admin/profiles?kind=business" icon={Building2} label="Businesses" value={stats.businesses} tone="bg-[#F4E8D4] text-[#B07A32]" />
-        <TypeTile to="/admin/profiles?type=HOTEL" icon={Hotel} label="Hotels" value={stats.hotels} tone="bg-[#ECE8FF] text-[#6d28d9]" />
-        <TypeTile to="/admin/profiles?type=RESTAURANT" icon={UtensilsCrossed} label="Restaurants" value={stats.restaurants} tone="bg-[#FDE8E8] text-[#c2410c]" />
-        <TypeTile to="/admin/profiles?type=CAFETERIA" icon={Coffee} label="Cafeterias" value={stats.cafeterias} tone="bg-[#FFF4E5] text-[#c2410c]" />
-      </div>
-      {(data.profileTypes?.length ?? 0) > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {data.profileTypes?.map((item) => (
-            <Link key={item.id} to={`/admin/profiles?type=${item.slug}`} className="rounded-full border border-[#EEEFF3] bg-white px-3 py-1.5 text-xs text-slate-600 hover:border-blue-200">
-              {item.name}
-            </Link>
-          ))}
-        </div>
+              <Link to="/admin/design/card-designs" className="text-sm font-medium text-primary">Open designer</Link>
+            </div>
+            <div className="flex gap-6 overflow-x-auto pb-2 pt-2">
+              {data.cardDesigns?.map((design) => (
+                <div key={design.id} className="shrink-0">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">{design.name}</p>
+                  <FlipNfcCard title={brandName} design={design} />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-        <Card className="rounded-[24px] border-[#EEEFF3] shadow-none">
+        <Card>
           <CardContent className="p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold">Recent profiles</h2>
-              <Link to="/admin/profiles" className="text-sm text-[#5b5ce6]">View all</Link>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="font-semibold">{list === "recent" ? "Recent profiles" : "Recently updated"}</h2>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant={list === "recent" ? "default" : "outline"} onClick={() => setList("recent")}>Created</Button>
+                <Button size="sm" variant={list === "updated" ? "default" : "outline"} onClick={() => setList("updated")}>Updated</Button>
+                <Link to="/admin/profiles" className="text-sm font-medium text-primary">View all</Link>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              {data.recentProfiles.map((profile) => (
-                <Link key={profile.id} to={`/admin/profiles/${profile.id}`} className="flex items-center justify-between rounded-2xl px-3 py-3 transition hover:bg-[#F4F0FF]">
-                  <div className="flex items-center gap-3">
+            <div className="space-y-1">
+              {profiles.map((profile) => (
+                <Link key={profile.id} to={`/admin/profiles/${profile.id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl px-3 py-3 transition hover:bg-accent">
+                  <div className="flex min-w-0 items-center gap-3">
                     <Avatar profile={profile} />
-                    <div>
-                      <p className="font-medium">{profile.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{profile.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {typeLabel(profile.type)} · {profile.owner.name || "—"}
                       </p>
                     </div>
@@ -170,10 +225,10 @@ export function DashboardPage() {
                   </div>
                 </Link>
               ))}
-              {data.recentProfiles.length === 0 && (
+              {profiles.length === 0 && (
                 <div className="rounded-2xl border border-dashed py-12 text-center">
                   <p className="font-medium">No profiles yet</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Create your first digital profile.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Create the first digital profile.</p>
                   {can("profiles.create") && (
                     <Button className="mt-4" asChild>
                       <Link to="/admin/profiles/new">Create Profile</Link>
@@ -184,12 +239,12 @@ export function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-[24px] border-[#EEEFF3] shadow-none">
+        <Card>
           <CardContent className="p-5">
             <h2 className="mb-4 font-semibold">Recent activity</h2>
             <div className="space-y-3">
               {data.recentActivity.map((item) => (
-                <div key={item.id} className="border-b border-[#EEEFF3] pb-3 last:border-0">
+                <div key={item.id} className="border-b border-border pb-3 last:border-0">
                   <p className="text-sm">
                     <span className="font-medium">{item.adminName}</span> {labelAction(item.action)} {item.targetName}
                   </p>
@@ -205,23 +260,54 @@ export function DashboardPage() {
   );
 }
 
-function Stat({
+function TrendChart({ created, views }: { created: DayPoint[]; views: DayPoint[] }) {
+  const points = created.length ? created : views;
+  if (points.length === 0) {
+    return <p className="text-sm text-muted-foreground">No dated activity is available yet.</p>;
+  }
+  const width = 640;
+  const height = 180;
+  const max = Math.max(1, ...created.map((point) => point.count), ...views.map((point) => point.count));
+  const line = (series: DayPoint[]) =>
+    series
+      .map((point, index) => {
+        const x = series.length === 1 ? width / 2 : (index / (series.length - 1)) * (width - 24) + 12;
+        const y = height - 28 - (point.count / max) * (height - 48);
+        return `${index === 0 ? "M" : "L"}${x},${y}`;
+      })
+      .join(" ");
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-48 w-full" role="img" aria-label="Profiles created and views over the last 7 days">
+        <line x1="12" y1={height - 28} x2={width - 12} y2={height - 28} className="stroke-border" />
+        {created.length > 0 && <path d={line(created)} fill="none" className="stroke-primary" strokeWidth="2.5" />}
+        {views.length > 0 && <path d={line(views)} fill="none" className="stroke-sky-400" strokeWidth="2.5" strokeDasharray="5 4" />}
+      </svg>
+      <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-2"><span className="h-0.5 w-4 bg-primary" /> Profiles created</span>
+        <span className="inline-flex items-center gap-2"><span className="h-0.5 w-4 border-t-2 border-dashed border-sky-400" /> Views</span>
+        <span className="ml-auto">{points.map((point) => point.day.slice(5)).join("  ")}</span>
+      </div>
+    </div>
+  );
+}
+
+function Kpi({
   icon: Icon,
   label,
   value,
   hint,
-  color,
 }: {
   icon: typeof UserRound;
   label: string;
   value: number;
   hint: string;
-  color: string;
 }) {
   return (
-    <Card className="rounded-[24px] border-[#EEEFF3] shadow-none">
+    <Card>
       <CardContent className="p-5">
-        <div className={`mb-4 inline-flex rounded-2xl p-2.5 ${color}`}>
+        <div className="mb-4 inline-flex rounded-xl bg-secondary p-2.5 text-secondary-foreground">
           <Icon className="h-4 w-4" />
         </div>
         <p className="text-3xl font-semibold tracking-tight">{value}</p>
@@ -234,8 +320,8 @@ function Stat({
 
 function QuickAction({ to, icon: Icon, label }: { to: string; icon: typeof Plus; label: string }) {
   return (
-    <Link to={to} className="flex items-center gap-3 rounded-[18px] border border-[#EEEFF3] bg-white px-4 py-3 text-sm font-medium transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E3F2FD] text-[#1565C0]">
+    <Link to={to} className="flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 text-sm font-medium shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-primary/30">
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
         <Icon className="h-4 w-4" />
       </span>
       {label}
@@ -248,21 +334,19 @@ function TypeTile({
   icon: Icon,
   label,
   value,
-  tone,
 }: {
   to: string;
   icon: typeof UserRound;
   label: string;
   value: number;
-  tone: string;
 }) {
   return (
-    <Link to={to} className="rounded-[22px] border border-[#EEEFF3] bg-white p-4 transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-sm">
-      <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>
+    <Link to={to} className="rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-primary/30">
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
         <Icon className="h-4 w-4" />
       </div>
       <p className="text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-0.5 text-sm text-slate-500">{label}</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">{label}</p>
     </Link>
   );
 }
@@ -272,7 +356,7 @@ function Avatar({ profile }: { profile: AdminProfile }) {
   return src ? (
     <img src={src} alt="" className="h-10 w-10 rounded-xl object-cover" />
   ) : (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-sm font-medium text-violet-700">
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-sm font-medium text-secondary-foreground">
       {profile.name?.[0] || "P"}
     </div>
   );

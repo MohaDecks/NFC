@@ -26,7 +26,7 @@ export function SkillsEditor({
       <p className="text-sm text-muted-foreground">Add skills as chips. Empty skills are hidden on the public page.</p>
       <div className="flex flex-wrap gap-2">
         {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-1 rounded-full border bg-white px-2 py-1">
+          <div key={index} className="flex items-center gap-1 rounded-full border bg-card px-2 py-1">
             <Input
               className="h-8 w-32 border-0 bg-transparent px-1"
               value={item.title ?? ""}
@@ -63,7 +63,7 @@ export function ProjectsEditor({
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
-        <div key={index} className="space-y-3 rounded-2xl border bg-white p-4">
+        <div key={index} className="space-y-3 rounded-2xl border bg-card p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Project title" value={item.title ?? ""} onChange={(title) => update(items, index, { title }, onChange)} />
             <Field label="Category" value={item.category ?? ""} onChange={(category) => update(items, index, { category }, onChange)} />
@@ -119,7 +119,7 @@ export function ExperienceEditor({
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
-        <div key={index} className="grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-2">
+        <div key={index} className="grid gap-3 rounded-2xl border bg-card p-4 sm:grid-cols-2">
           <Field label="Position" value={item.title ?? ""} onChange={(title) => update(items, index, { title }, onChange)} />
           <Field label="Company" value={item.company ?? ""} onChange={(company) => update(items, index, { company }, onChange)} />
           <Field label="Start" value={item.startDate ?? ""} onChange={(startDate) => update(items, index, { startDate }, onChange)} placeholder="2024" />
@@ -158,7 +158,7 @@ export function CredentialEditor({
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
-        <div key={index} className="grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-2">
+        <div key={index} className="grid gap-3 rounded-2xl border bg-card p-4 sm:grid-cols-2">
           <Field label="Title" value={item.title ?? ""} onChange={(title) => update(items, index, { title }, onChange)} />
           <Field label="Details" value={item.text ?? ""} onChange={(text) => update(items, index, { text }, onChange)} />
           <Field label="Start" value={item.startDate ?? ""} onChange={(startDate) => update(items, index, { startDate }, onChange)} />

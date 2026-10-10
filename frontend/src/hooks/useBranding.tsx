@@ -60,6 +60,8 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     document.documentElement.style.setProperty("--brand-from", branding.primaryColor);
     document.documentElement.style.setProperty("--brand-to", branding.secondaryColor);
     document.documentElement.style.setProperty("--primary", branding.primaryColor);
+    document.documentElement.style.setProperty("--ring", branding.primaryColor);
+    document.documentElement.style.setProperty("--sidebar-active", branding.primaryColor);
     const icon = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
     if (icon) icon.href = branding.faviconUrl;
     const desc = document.querySelector("meta[name='description']") as HTMLMetaElement | null;

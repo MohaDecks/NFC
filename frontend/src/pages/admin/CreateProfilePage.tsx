@@ -118,8 +118,8 @@ export function CreateProfilePage() {
   }
 
   return (
-    <div className="-mx-4 flex min-h-[calc(100vh-72px)] flex-col bg-[#F7F8FC] lg:-mx-7">
-      <div className="border-b border-[#EEEFF3] bg-white px-5 py-4 lg:px-8">
+    <div className="-mx-4 -my-5 flex min-h-[calc(100vh-8rem)] flex-col bg-muted sm:-mx-6">
+      <div className="border-b border-border bg-card px-5 py-4 lg:px-8">
         <Link to="/admin" className="mb-3 inline-flex items-center gap-1.5 text-[13px] text-slate-400 hover:text-slate-700">
           <ArrowLeft className="h-3.5 w-3.5" /> Create profile
         </Link>
@@ -130,7 +130,7 @@ export function CreateProfilePage() {
               type="button"
               onClick={() => void goTo(item.id)}
               className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] ${
-                step === item.id ? "bg-[#1565C0] text-white" : step > item.id ? "bg-[#E3F2FD] text-[#1565C0]" : "bg-[#F3F4F6] text-slate-500"
+                step === item.id ? "bg-primary text-primary-foreground" : step > item.id ? "bg-secondary text-primary" : "bg-muted text-muted-foreground"
               }`}
             >
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[11px] font-semibold">
@@ -290,7 +290,7 @@ export function CreateProfilePage() {
         <aside className="lg:sticky lg:top-24">
           <p className="mb-3 text-center text-[12px] text-slate-400">Live preview</p>
           {profile && step === 2 ? (
-            <div className="mx-auto w-[260px] overflow-hidden rounded-[36px] border-[10px] border-[#111827] bg-white shadow-[0_28px_60px_rgba(15,23,42,0.28)]">
+            <div className="mx-auto w-[260px] overflow-hidden rounded-[36px] border-[10px] border-[#111827] bg-card shadow-[0_28px_60px_rgba(15,23,42,0.28)]">
               <div className="h-[520px] overflow-y-auto">
                 <ProfileRenderer profile={ownerToPublic(profile)} />
               </div>
@@ -308,11 +308,11 @@ export function CreateProfilePage() {
         </aside>
       </div>
 
-      <div className="sticky bottom-0 flex items-center justify-between border-t border-[#EEEFF3] bg-white px-5 py-3.5 lg:px-8">
+      <div className="sticky bottom-0 flex items-center justify-between border-t border-border bg-card px-5 py-3.5 lg:px-8">
         <Button variant="outline" className="rounded-full" disabled={step === 0} onClick={() => setStep((value) => Math.max(0, value - 1))}>
           Back
         </Button>
-        <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]" disabled={busy} onClick={() => void next()}>
+        <Button className="rounded-full bg-primary hover:bg-primary/90" disabled={busy} onClick={() => void next()}>
           {step === 2 ? "Publish profile" : "Next"} <ArrowRight className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -348,7 +348,7 @@ function DesignStep({ profile, onChange }: { profile: AdminProfile; onChange: (d
             <button
               key={id}
               type="button"
-              className={`rounded-2xl border px-4 py-3 text-left capitalize ${profile.design.template === id ? "border-[#1565C0] bg-[#E3F2FD]" : "border-[#EEEFF3]"}`}
+              className={`rounded-2xl border px-4 py-3 text-left capitalize ${profile.design.template === id ? "border-[#1565C0] bg-secondary" : "border-border"}`}
               onClick={() => void onChange({ ...DEFAULT_DESIGN, ...profile.design, template: id })}
             >
               {id}
@@ -361,7 +361,7 @@ function DesignStep({ profile, onChange }: { profile: AdminProfile; onChange: (d
 }
 
 function Card({ children }: { children: ReactNode }) {
-  return <div className="rounded-[22px] border border-[#EEEFF3] bg-white p-5">{children}</div>;
+  return <div className="rounded-2xl border border-border bg-card p-5">{children}</div>;
 }
 
 function Field({

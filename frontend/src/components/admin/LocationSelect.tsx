@@ -66,7 +66,7 @@ export function LocationSelect({
           placeholder="Search country"
         />
         {openCountry && (
-          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border bg-white shadow-lg">
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border bg-card shadow-lg">
             {filteredCountries.map((item) => (
               <button
                 key={item.id}
@@ -102,7 +102,7 @@ export function LocationSelect({
           placeholder={countryId ? "Search city" : "Select a country first"}
         />
         {openCity && countryId && (
-          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border bg-white shadow-lg">
+          <div className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border bg-card shadow-lg">
             {filteredCities.map((item) => (
               <button
                 key={item.id}

@@ -109,7 +109,7 @@ export async function uploadBrandingLogo(req: Request, res: Response) {
     console.error("Branding logo store failed", err);
     throw new AppError(400, "Could not save this logo. Try a PNG or JPG.", "STORE_FAILED");
   }
-  branding.logo = {
+  const logo = {
     publicId: stored.publicId,
     secureUrl: stored.secureUrl,
     width: stored.width || 0,
@@ -118,7 +118,13 @@ export async function uploadBrandingLogo(req: Request, res: Response) {
     provider: stored.provider || "local",
     filename: stored.filename,
   };
-  await branding.save();
+  try {
+    await ApplicationBranding.updateOne({ _id: branding._id }, { $set: { logo } });
+    branding.logo = logo;
+  } catch (err) {
+    console.error("Branding logo document failed", err);
+    throw new AppError(400, "Logo saved, but branding could not be updated. Try again.", "BRANDING_SAVE_FAILED");
+  }
   await writeAudit(actor, "LOGO_UPDATED", { id: branding.id, name: branding.name, type: "ApplicationBranding" });
   return ok(res, { branding: serializeBranding(branding) });
 }

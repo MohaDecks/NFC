@@ -54,7 +54,7 @@ export function CardsAdminPage() {
       </div>
       {can("nfc.manage") && (
         <form
-          className="grid gap-3 rounded-[22px] border border-[#EEEFF3] bg-white p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          className="grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
           onSubmit={async (event) => {
             event.preventDefault();
             try {
@@ -79,7 +79,7 @@ export function CardsAdminPage() {
             <Label>Card name</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Reception Card" />
           </div>
-          <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]">+ Create Card</Button>
+          <Button className="rounded-full bg-primary hover:bg-primary/90">+ Create Card</Button>
         </form>
       )}
       <div className="flex gap-2">
@@ -89,7 +89,7 @@ export function CardsAdminPage() {
           </Button>
         ))}
       </div>
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -108,17 +108,17 @@ export function CardsAdminPage() {
                   <p className="font-mono text-[11px] text-slate-400">{card.cardId}</p>
                 </td>
                 <td>
-                  <Link to={`/admin/profiles/${card.profileId}`} className="text-[#1565C0]">{card.profileName || "Profile"}</Link>
+                  <Link to={`/admin/profiles/${card.profileId}`} className="text-primary">{card.profileName || "Profile"}</Link>
                 </td>
                 <td className="font-mono text-[11px]">{card.publicId ? profileUrl(card.publicId) : card.publicUrl}</td>
                 <td>{card.status}</td>
                 <td className="pr-5 text-right">
                   {can("nfc.manage") && (
                     <>
-                      <button className="mr-2 text-[#1565C0]" onClick={async () => { await api.patch(`/api/admin/cards/${card.id}`, { status: card.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }); await load(); }}>
+                      <button className="mr-2 text-primary" onClick={async () => { await api.patch(`/api/admin/cards/${card.id}`, { status: card.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }); await load(); }}>
                         {card.status === "ACTIVE" ? "Deactivate" : "Activate"}
                       </button>
-                      <button className="mr-2 text-[#1565C0]" onClick={async () => { await api.patch(`/api/admin/cards/${card.id}`, { status: "REPLACED" }); await load(); }}>Replace</button>
+                      <button className="mr-2 text-primary" onClick={async () => { await api.patch(`/api/admin/cards/${card.id}`, { status: "REPLACED" }); await load(); }}>Replace</button>
                       <button className="text-red-500" onClick={async () => { if (!window.confirm("Delete this card?")) return; await api.delete(`/api/admin/cards/${card.id}`); await load(); }}>Delete</button>
                     </>
                   )}

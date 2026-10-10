@@ -77,14 +77,14 @@ export function ProfilesPage({ kind }: { kind?: "business" | "customer" }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
           <p className="text-sm text-muted-foreground">{data?.total ?? 0} records</p>
         </div>
-        <Button className="h-10 rounded-full bg-[#5b5ce6] px-5 hover:bg-[#4F46E5]" onClick={() => navigate(type ? `/admin/profiles/new?type=${type}` : "/admin/profiles/new")}>+ Create Profile</Button>
+        <Button className="h-10 rounded-full bg-primary px-5 hover:bg-primary/90" onClick={() => navigate(type ? `/admin/profiles/new?type=${type}` : "/admin/profiles/new")}>+ Create Profile</Button>
       </div>
-      <Card className="rounded-[22px] border-[#EEEFF3] shadow-none">
+      <Card className="rounded-2xl border-border shadow-none">
         <CardContent className="grid gap-3 p-4 md:grid-cols-5">
           <Input className="rounded-full" placeholder="Search name, phone, public ID" defaultValue={search} onBlur={(e) => setFilter("search", e.target.value)} />
           {!kind && (
@@ -109,9 +109,9 @@ export function ProfilesPage({ kind }: { kind?: "business" | "customer" }) {
           <Input type="date" value={from} onChange={(e) => setFilter("from", e.target.value)} />
         </CardContent>
       </Card>
-      <div className="overflow-hidden rounded-3xl border bg-white shadow-sm dark:bg-card">
+      <div className="overflow-hidden rounded-3xl border bg-card shadow-sm dark:bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-[#F7F8FC] text-left text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Profile</th>
               <th>Type</th>
@@ -218,6 +218,6 @@ export function ProfilesPage({ kind }: { kind?: "business" | "customer" }) {
 function Thumb({ profile }: { profile: AdminProfile }) {
   const src = profile.avatarUrl || profile.logoUrl;
   return src ? <img src={src} alt="" className="h-10 w-10 rounded-xl object-cover" /> : (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1b6b5a]/10 font-medium text-[#1b6b5a]">{profile.name?.[0] || "P"}</div>
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 font-medium text-[#1b6b5a]">{profile.name?.[0] || "P"}</div>
   );
 }

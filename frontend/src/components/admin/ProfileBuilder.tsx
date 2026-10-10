@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { GripVertical, Eye, EyeOff, Monitor, Plus, Smartphone, Trash2 } from "lucide-react";
+import { GripVertical, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
+import { profileUrl } from "@/lib/utils";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -26,7 +27,6 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
   const [sections, setSections] = useState<ProfileSectionItem[]>(profile.sections ?? []);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
   const [extras, setExtras] = useState<Pick<PublicProfile, "menu" | "services" | "rooms">>({ menu: [], services: [], rooms: [] });
-  const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const active = sections.find((section) => section.id === activeId) ?? sections[0];
   const preview = useMemo(() => ownerToPublic({ ...profile, sections }, extras), [profile, sections, extras]);
@@ -88,8 +88,9 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)_320px]">
-      <div className="rounded-2xl border bg-white p-3">
+    <div className="space-y-4">
+    <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <div className="rounded-2xl border bg-card p-3">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sections</p>
           <select
@@ -117,7 +118,7 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
                   <button
                     type="button"
                     onClick={() => setActiveId(section.id)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm ${section.id === active?.id ? "bg-[#1b6b5a]/10 text-[#1b6b5a]" : "hover:bg-black/5"}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm ${section.id === active?.id ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}
                   >
                     <span>{section.title}</span>
                     {!section.visible && <EyeOff className="h-3.5 w-3.5 opacity-50" />}
@@ -129,7 +130,7 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
         </DndContext>
       </div>
 
-      <div className="rounded-2xl border bg-white p-5">
+      <div className="rounded-2xl border bg-card p-5">
         {active ? (
           <SectionEditor
             profile={profile}
@@ -148,22 +149,21 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
           <p className="text-sm text-muted-foreground">Add a section to start building this presence.</p>
         )}
       </div>
-
-      <div>
-        <div className="mb-2 flex justify-end gap-1">
-          <Button size="sm" variant={device === "mobile" ? "default" : "outline"} onClick={() => setDevice("mobile")}>
-            <Smartphone className="h-3.5 w-3.5" /> Phone
-          </Button>
-          <Button size="sm" variant={device === "desktop" ? "default" : "outline"} onClick={() => setDevice("desktop")}>
-            <Monitor className="h-3.5 w-3.5" /> Desktop
-          </Button>
-        </div>
-        <div className={`overflow-hidden border bg-white shadow-xl ${device === "mobile" ? "mx-auto w-[320px] rounded-[2rem]" : "rounded-2xl"}`}>
-          <div className="h-[720px] overflow-y-auto">
-            <ProfileRenderer profile={preview} template={profile.design.template} />
+    </div>
+      <section className="overflow-hidden rounded-2xl border bg-background">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-card px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold">Website</p>
+            <p className="text-xs text-muted-foreground">Full-size public page. It uses this profile’s content.</p>
           </div>
+          <a href={profileUrl(profile.publicId)} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary">
+            Open full page
+          </a>
         </div>
-      </div>
+        <div className="max-h-[85vh] overflow-auto">
+          <ProfileRenderer profile={preview} template={profile.design.template} fullPage />
+        </div>
+      </section>
     </div>
   );
 }

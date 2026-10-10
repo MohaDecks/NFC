@@ -117,7 +117,7 @@ export function AdminMenuBuilder({ profile }: { profile: AdminProfile }) {
       </div>
 
       {categories.length === 0 ? (
-        <div className="rounded-2xl border bg-white p-10 text-center">
+        <div className="rounded-2xl border bg-card p-10 text-center">
           <p className="font-medium">No categories yet</p>
           <p className="mt-1 text-sm text-muted-foreground">Start with Breakfast, Lunch, Drinks, or anything they serve.</p>
         </div>
@@ -132,7 +132,7 @@ export function AdminMenuBuilder({ profile }: { profile: AdminProfile }) {
                       type="button"
                       onClick={() => setActiveId(category.id)}
                       className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm ${
-                        category.id === active?.id ? "border-primary bg-white" : "bg-white/70"
+                        category.id === active?.id ? "border-primary bg-card" : "bg-card/70"
                       }`}
                     >
                       <span>{category.name}</span>
@@ -145,7 +145,7 @@ export function AdminMenuBuilder({ profile }: { profile: AdminProfile }) {
           </DndContext>
 
           {active && (
-            <div className="rounded-xl border bg-white p-3">
+            <div className="rounded-xl border bg-card p-3">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-semibold">{active.name}</h3>
                 <div className="flex gap-1">

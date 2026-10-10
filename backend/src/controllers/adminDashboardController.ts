@@ -8,7 +8,24 @@ import { CardDesign } from "../models/CardDesign";
 import { ok } from "../utils/response";
 import { serializeProfile } from "../services/profileService";
 
+function utcDayKeys(count: number) {
+  const keys: string[] = [];
+  const now = new Date();
+  for (let offset = count - 1; offset >= 0; offset -= 1) {
+    const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - offset));
+    keys.push(day.toISOString().slice(0, 10));
+  }
+  return keys;
+}
+
+function seriesFrom(keys: string[], rows: { _id: string; count: number }[]) {
+  const map = new Map(rows.map((row) => [String(row._id), row.count]));
+  return keys.map((day) => ({ day, count: map.get(day) ?? 0 }));
+}
+
 export async function getDashboard(_req: Request, res: Response) {
+  const days = utcDayKeys(7);
+  const since = new Date(`${days[0]}T00:00:00.000Z`);
   const [
     total,
     active,
@@ -21,13 +38,21 @@ export async function getDashboard(_req: Request, res: Response) {
     hotels,
     restaurants,
     cafeterias,
+    doctors,
+    engineers,
+    portfolios,
     recent,
+    recentlyUpdated,
     activity,
     views,
     published,
+    drafts,
     nfcCards,
+    qrCodes,
     profileTypes,
     cardDesigns,
+    createdRows,
+    viewRows,
   ] = await Promise.all([
     Profile.countDocuments(),
     Profile.countDocuments({ status: "ACTIVE" }),
@@ -40,13 +65,27 @@ export async function getDashboard(_req: Request, res: Response) {
     Profile.countDocuments({ type: "HOTEL" }),
     Profile.countDocuments({ type: "RESTAURANT" }),
     Profile.countDocuments({ type: "CAFETERIA" }),
-    Profile.find().sort({ createdAt: -1 }).limit(8).populate(["avatar", "logo"]),
-    AuditLog.find().sort({ createdAt: -1 }).limit(10),
+    Profile.countDocuments({ type: "DOCTOR" }),
+    Profile.countDocuments({ type: "ENGINEER" }),
+    Profile.countDocuments({ type: "PORTFOLIO" }),
+    Profile.find().sort({ createdAt: -1 }).limit(6).populate(["avatar", "logo"]),
+    Profile.find().sort({ updatedAt: -1 }).limit(6).populate(["avatar", "logo"]),
+    AuditLog.find().sort({ createdAt: -1 }).limit(8),
     ProfileView.countDocuments(),
     Profile.countDocuments({ publishState: "PUBLISHED", status: "ACTIVE" }),
+    Profile.countDocuments({ publishState: "DRAFT" }),
     NFCCard.countDocuments(),
+    NFCCard.countDocuments({ qrEnabled: true }),
     ProfileType.find({ status: "ACTIVE" }).sort({ name: 1 }).limit(12),
     CardDesign.find({ status: "ACTIVE" }).sort({ name: 1 }).limit(8),
+    Profile.aggregate<{ _id: string; count: number }>([
+      { $match: { createdAt: { $gte: since } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "UTC" } }, count: { $sum: 1 } } },
+    ]),
+    ProfileView.aggregate<{ _id: string; count: number }>([
+      { $match: { viewedAt: { $gte: since } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$viewedAt", timezone: "UTC" } }, count: { $sum: 1 } } },
+    ]),
   ]);
 
   return ok(res, {
@@ -62,10 +101,18 @@ export async function getDashboard(_req: Request, res: Response) {
       hotels,
       restaurants,
       cafeterias,
+      doctors,
+      engineers,
+      portfolios,
       published,
+      drafts,
       nfcCards,
+      qrCodes,
       views,
     },
+    growth: seriesFrom(days, createdRows),
+    viewsByDay: seriesFrom(days, viewRows),
+    recentlyUpdated: recentlyUpdated.map(serializeProfile),
     profileTypes: profileTypes.map((item) => ({ id: item.id, name: item.name, slug: item.slug })),
     cardDesigns: cardDesigns.map((item) => ({
       id: item.id,

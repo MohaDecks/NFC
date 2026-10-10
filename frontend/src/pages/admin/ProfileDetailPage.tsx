@@ -7,8 +7,8 @@ import { defaultCardDesignForType } from "@shared/cardDesign";
 import { LocationSelect } from "@/components/admin/LocationSelect";
 import { api } from "@/lib/api";
 import { friendlyError, profileUrl } from "@/lib/utils";
-import { Monitor, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DevicePreview } from "@/components/admin/DevicePreview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,7 +41,7 @@ export function ProfileDetailPage() {
   const { can } = useAdmin();
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [confirm, setConfirm] = useState<ConfirmKind>(null);
-  const tab = params.get("tab") ?? "overview";
+  const tab = params.get("tab") ?? "website";
 
   async function load() {
     if (!id) return;
@@ -64,15 +64,15 @@ export function ProfileDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-white p-5 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-4">
           {image ? (
             <img src={image} alt="" className="h-16 w-16 rounded-2xl object-cover" />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1b6b5a]/10 text-xl">{profile.name[0]}</div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-xl">{profile.name[0]}</div>
           )}
           <div>
-            <h1 className="font-serif text-3xl">{profile.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{profile.name}</h1>
             <p className="text-sm text-muted-foreground">
               {resolveProfileType(profile.type).label} · {profile.owner.name || "No owner name"}
             </p>
@@ -147,13 +147,13 @@ export function ProfileDetailPage() {
 
       <Tabs value={tab} onValueChange={(value) => setParams({ tab: value })}>
         <TabsList className="flex h-auto flex-wrap gap-1">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="website">Website</TabsTrigger>
+          <TabsTrigger value="overview">Profile</TabsTrigger>
+          <TabsTrigger value="nfc">Card</TabsTrigger>
+          <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="social">Social</TabsTrigger>
-          <TabsTrigger value="nfc">NFC / QR</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
@@ -229,7 +229,7 @@ function OverviewTab({ profile, onChange }: { profile: AdminProfile; onChange: (
   const [form, setForm] = useState(profile);
   useEffect(() => setForm(profile), [profile]);
   return (
-    <div className="space-y-4 rounded-2xl border bg-white p-6">
+    <div className="space-y-4 rounded-2xl border bg-card p-6">
       <Field label="Name" value={form.name} onChange={(name) => setForm({ ...form, name })} />
       <Field label="Owner" value={form.owner.name} onChange={(name) => setForm({ ...form, owner: { ...form.owner, name } })} />
       <Field label="Owner email" value={form.owner.email} onChange={(email) => setForm({ ...form, owner: { ...form.owner, email } })} />
@@ -266,7 +266,7 @@ function ContentTab({ profile, onChange }: { profile: AdminProfile; onChange: (p
   useEffect(() => setForm(profile), [profile]);
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 rounded-2xl border bg-white p-6 sm:grid-cols-2">
+      <div className="grid gap-4 rounded-2xl border bg-card p-6 sm:grid-cols-2">
         <Field label="Phone" value={form.contact.phone} onChange={(phone) => setForm({ ...form, contact: { ...form.contact, phone } })} />
         <Field label="WhatsApp" value={form.contact.whatsapp} onChange={(whatsapp) => setForm({ ...form, contact: { ...form.contact, whatsapp } })} />
         <Field label="Email" value={form.contact.email} onChange={(email) => setForm({ ...form, contact: { ...form.contact, email } })} />
@@ -292,17 +292,17 @@ function ContentTab({ profile, onChange }: { profile: AdminProfile; onChange: (p
         />
       </div>
       {features.openingHours && (
-        <div className="rounded-2xl border bg-white p-6">
+        <div className="rounded-2xl border bg-card p-6">
           <OpeningHoursEditor value={form.openingHours} onChange={(openingHours) => setForm({ ...form, openingHours })} />
         </div>
       )}
       {features.amenities && (
-        <div className="rounded-2xl border bg-white p-6">
+        <div className="rounded-2xl border bg-card p-6">
           <TagInput value={form.amenities} onChange={(amenities) => setForm({ ...form, amenities })} placeholder="WiFi, Parking..." />
         </div>
       )}
       {features.socialLinks && (
-        <div className="rounded-2xl border bg-white p-6">
+        <div className="rounded-2xl border bg-card p-6">
           <SocialLinksEditor value={form.socialLinks} onChange={(socialLinks) => setForm({ ...form, socialLinks })} />
         </div>
       )}
@@ -355,7 +355,7 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
   }
 
   return (
-    <div className="grid gap-6 overflow-hidden rounded-2xl border bg-white p-6 sm:grid-cols-2">
+    <div className="grid gap-6 overflow-hidden rounded-2xl border bg-card p-6 sm:grid-cols-2">
       {features.avatar && (
         <ImageUpload
           label="Profile image"
@@ -428,7 +428,6 @@ function MediaTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: 
 
 function DesignTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: AdminProfile) => void }) {
   const [design, setDesign] = useState(profile.design);
-  const [device, setDevice] = useState<"mobile" | "desktop">("desktop");
   const preview = useMemo(() => ownerToPublic({ ...profile, design }), [profile, design]);
   async function save(next: Design) {
     setDesign(next);
@@ -436,8 +435,8 @@ function DesignTab({ profile, onChange }: { profile: AdminProfile; onChange: (p:
     onChange(data.profile);
   }
   return (
-    <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
-      <div className="space-y-4 rounded-2xl border bg-white p-4">
+    <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="h-fit space-y-4 rounded-2xl border bg-card p-4 xl:sticky xl:top-4">
         <p className="text-xs uppercase tracking-wide text-muted-foreground">Template</p>
         {templatesForType(profile.type).map((id) => (
           <button
@@ -495,21 +494,10 @@ function DesignTab({ profile, onChange }: { profile: AdminProfile; onChange: (p:
           <option value="minimal">Minimal hero</option>
         </select>
       </div>
-      <div>
-        <div className="mb-2 flex justify-end gap-1">
-          <Button size="sm" variant={device === "mobile" ? "default" : "outline"} onClick={() => setDevice("mobile")}>
-            <Smartphone className="h-3.5 w-3.5" /> Phone
-          </Button>
-          <Button size="sm" variant={device === "desktop" ? "default" : "outline"} onClick={() => setDevice("desktop")}>
-            <Monitor className="h-3.5 w-3.5" /> Desktop
-          </Button>
-        </div>
-        <div className={`overflow-hidden border bg-white shadow-xl ${device === "mobile" ? "mx-auto w-[360px] rounded-[2rem]" : "rounded-2xl"}`}>
-          <div className="h-[720px] overflow-y-auto">
-            <ProfileRenderer profile={preview} />
-          </div>
-        </div>
-      </div>
+      <DevicePreview
+        liveUrl={profileUrl(profile.publicId)}
+        render={() => <ProfileRenderer profile={preview} fullPage />}
+      />
     </div>
   );
 }
@@ -523,7 +511,7 @@ function NfcTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: Ad
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border bg-white p-6">
+        <div className="rounded-2xl border bg-card p-6">
           <p className="text-xs uppercase text-muted-foreground">NFC URL</p>
           <p className="mt-2 break-all font-mono text-sm">{url}</p>
           <p className="mt-3 text-sm text-muted-foreground">The card stores only this URL. Profile content always stays on the website.</p>
@@ -537,7 +525,7 @@ function NfcTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: Ad
             Copy URL
           </Button>
         </div>
-        <div className="rounded-2xl border bg-white p-6 text-center">
+        <div className="rounded-2xl border bg-card p-6 text-center">
           <QRCodeCanvas id={`qr-${profile.publicId}`} value={url} size={200} includeMargin />
           <Button
             className="mt-4"
@@ -555,7 +543,7 @@ function NfcTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: Ad
           </Button>
         </div>
       </div>
-      <div className="rounded-2xl border bg-white p-5">
+      <div className="rounded-2xl border bg-card p-5">
         <h2 className="mb-4 text-lg font-semibold">Card design</h2>
         <CardDesigner
           profile={profile}
@@ -587,7 +575,7 @@ function AnalyticsTab({ profileId }: { profileId: string }) {
           ["Month", stats?.viewsThisMonth],
         ] as const
       ).map(([label, value]) => (
-        <div key={label} className="rounded-2xl border bg-white p-5">
+        <div key={label} className="rounded-2xl border bg-card p-5">
           <p className="text-xs uppercase text-muted-foreground">{label}</p>
           <p className="mt-2 font-serif text-3xl">{value ?? 0}</p>
         </div>
@@ -602,7 +590,7 @@ function ActivityTab({ profileId }: { profileId: string }) {
     void api.get<{ logs: AuditItem[] }>(`/api/admin/audit-logs?targetId=${profileId}`).then((d) => setLogs(d.logs));
   }, [profileId]);
   return (
-    <div className="space-y-3 rounded-2xl border bg-white p-5">
+    <div className="space-y-3 rounded-2xl border bg-card p-5">
       {logs.map((log) => (
         <div key={log.id} className="border-b border-black/5 pb-3 last:border-0">
           <p className="text-sm">
@@ -618,7 +606,7 @@ function ActivityTab({ profileId }: { profileId: string }) {
 
 function SocialTab({ profile, onChange }: { profile: AdminProfile; onChange: (p: AdminProfile) => void }) {
   return (
-    <div className="rounded-2xl border bg-white p-6">
+    <div className="rounded-2xl border bg-card p-6">
       <SocialLinksEditor
         value={profile.socialLinks}
         onChange={(socialLinks) =>

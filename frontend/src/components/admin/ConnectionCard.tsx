@@ -33,7 +33,7 @@ export function ConnectionCard({ profile }: { profile: AdminProfile }) {
   }
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_24px_rgba(17,22,20,0.04)] transition duration-300 hover:-translate-y-1 hover:border-[#1b6b5a]/25 hover:shadow-[0_22px_48px_rgba(17,22,20,0.12)]">
+    <article className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_24px_rgba(17,22,20,0.04)] transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_22px_48px_rgba(17,22,20,0.12)]">
       <div className="h-1.5 w-full" style={{ background: color }} />
       <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100" style={{ background: `linear-gradient(180deg, color-mix(in oklab, ${color} 8%, transparent), transparent 42%)` }} />
 
@@ -56,7 +56,7 @@ export function ConnectionCard({ profile }: { profile: AdminProfile }) {
         </div>
 
         <div className="mt-4 flex justify-center">
-          <div className="rounded-2xl border border-black/[0.05] bg-[#f7f4ee] p-3 shadow-inner transition duration-300 group-hover:scale-[1.03] group-hover:bg-white group-hover:shadow-[0_12px_30px_rgba(17,22,20,0.08)]">
+          <div className="rounded-2xl border border-border bg-muted p-3 shadow-inner transition duration-300 group-hover:scale-[1.03] group-hover:bg-card group-hover:shadow-[0_12px_30px_rgba(17,22,20,0.08)]">
             <QRCodeCanvas id={`hub-qr-${profile.publicId}`} value={url} size={148} includeMargin />
           </div>
         </div>
@@ -69,7 +69,7 @@ export function ConnectionCard({ profile }: { profile: AdminProfile }) {
         <button
           type="button"
           onClick={() => void copy()}
-          className="mt-3 flex w-full items-center gap-2 rounded-xl border border-black/[0.05] bg-[#f7f4ee] px-3 py-2 text-left transition hover:border-[#1b6b5a]/20 hover:bg-white"
+          className="mt-3 flex w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-left transition hover:border-primary/25 hover:bg-card"
         >
           {copied ? <Check className="h-3.5 w-3.5 text-[#1b6b5a]" /> : <Copy className="h-3.5 w-3.5 text-muted-foreground" />}
           <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground">{url}</span>

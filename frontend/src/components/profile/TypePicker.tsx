@@ -84,8 +84,8 @@ export function TypePicker({
             type="button"
             onClick={() => onChange(item.slug as ProfileType)}
             className={cn(
-              "rounded-[20px] border bg-white p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm",
-              selected ? "border-[#93C5FD] shadow-[0_10px_24px_rgba(29,78,216,0.12)]" : "border-[#EEEFF3]",
+              "rounded-[20px] border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:shadow-sm",
+              selected ? "border-[#93C5FD] shadow-[0_10px_24px_rgba(29,78,216,0.12)]" : "border-border",
             )}
           >
             <div className={cn("mb-3 flex h-10 w-10 items-center justify-center rounded-2xl", tones[item.slug] ?? "bg-[#EEF0F4] text-[#6B7280]")}>

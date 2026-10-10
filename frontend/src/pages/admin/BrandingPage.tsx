@@ -56,15 +56,15 @@ export function BrandingPage() {
         <h1 className="text-3xl font-semibold tracking-tight">Branding</h1>
         <p className="mt-1 text-sm text-muted-foreground">Company identity used across the admin portal, cards, and public pages.</p>
       </div>
-      <div className="rounded-[22px] border border-[#EEEFF3] bg-white p-6">
+      <div className="rounded-2xl border border-border bg-card p-6">
         <p className="text-sm font-medium">Current Logo</p>
-        <div className="mt-4 flex justify-center rounded-2xl bg-[#F7F8FC] p-6">
+        <div className="mt-4 flex justify-center rounded-2xl bg-muted p-6">
           <img src={branding.logoUrl} alt={branding.name} className="max-h-40 w-auto object-contain" />
         </div>
         <p className="mt-3 text-center text-xs text-muted-foreground">Source asset is kept at /branding/mubarek-logo-source.png</p>
         {can("settings.edit") && (
           <div className="mt-4 flex flex-wrap gap-2">
-            <label className="inline-flex h-10 cursor-pointer items-center rounded-full bg-[#1565C0] px-4 text-sm text-white">
+            <label className="inline-flex h-10 cursor-pointer items-center rounded-full bg-primary px-4 text-sm text-white">
               Upload / Replace Logo
               <input
                 type="file"
@@ -91,7 +91,7 @@ export function BrandingPage() {
           </div>
         )}
       </div>
-      <div className="space-y-4 rounded-[22px] border border-[#EEEFF3] bg-white p-6">
+      <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <div className="space-y-2">
           <Label>Company Name</Label>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -111,7 +111,7 @@ export function BrandingPage() {
           </div>
         </div>
         {can("settings.edit") && (
-          <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]" disabled={busy} onClick={() => void save()}>
+          <Button className="rounded-full bg-primary hover:bg-primary/90" disabled={busy} onClick={() => void save()}>
             Save Changes
           </Button>
         )}

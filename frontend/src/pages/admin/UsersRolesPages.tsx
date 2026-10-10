@@ -66,12 +66,12 @@ export function UsersPage() {
     <PageShell
       title="Users"
       action={can("users.create") && (
-        <Button className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]" onClick={() => navigate("/admin/users/new")}>
+        <Button className="rounded-full bg-primary hover:bg-primary/90" onClick={() => navigate("/admin/users/new")}>
           + Add User
         </Button>
       )}
     >
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -87,11 +87,11 @@ export function UsersPage() {
               <tr key={admin.id} className="border-t border-[#F1F2F6]">
                 <td className="px-5 py-3 font-medium">{admin.name}</td>
                 <td className="text-slate-500">{admin.email}</td>
-                <td className="text-[#5b5ce6]">{admin.role?.name ?? "—"}</td>
+                <td className="text-primary">{admin.role?.name ?? "—"}</td>
                 <td className="text-slate-500">{admin.city?.name || admin.county?.name || "—"}</td>
                 <td className="pr-5 text-right">
                   {can("users.edit") && (
-                    <button type="button" className="mr-2 text-[#5b5ce6]" onClick={() => navigate(`/admin/users/${admin.id}/edit`)}>
+                    <button type="button" className="mr-2 text-primary" onClick={() => navigate(`/admin/users/${admin.id}/edit`)}>
                       <Pencil className="h-4 w-4" />
                     </button>
                   )}
@@ -168,7 +168,7 @@ export function UserFormPage() {
   return (
     <PageShell title={editing ? "Edit User" : "New User"}>
       <form
-        className="max-w-4xl space-y-5 rounded-[22px] border border-[#EEEFF3] bg-white p-6"
+        className="max-w-4xl space-y-5 rounded-2xl border border-border bg-card p-6"
         onSubmit={async (event) => {
           event.preventDefault();
           setBusy(true);
@@ -212,7 +212,7 @@ export function UserFormPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]" disabled={busy}>{editing ? "Save User" : "Create User"}</Button>
+          <Button className="rounded-full bg-primary hover:bg-primary/90" disabled={busy}>{editing ? "Save User" : "Create User"}</Button>
           <Button type="button" variant="outline" className="rounded-full" onClick={() => navigate("/admin/users")}>Cancel</Button>
         </div>
       </form>
@@ -235,12 +235,12 @@ export function RolesPage() {
     <PageShell
       title="Roles"
       action={can("roles.create") && (
-        <Button className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]" onClick={() => navigate("/admin/roles/new")}>
+        <Button className="rounded-full bg-primary hover:bg-primary/90" onClick={() => navigate("/admin/roles/new")}>
           + Add Role
         </Button>
       )}
     >
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -262,7 +262,7 @@ export function RolesPage() {
                 </td>
                 <td className="pr-5 text-right">
                   {can("roles.edit") && (
-                    <button type="button" className="mr-2 text-[#5b5ce6]" onClick={() => navigate(`/admin/roles/${role.id}/edit`)}>
+                    <button type="button" className="mr-2 text-primary" onClick={() => navigate(`/admin/roles/${role.id}/edit`)}>
                       <Pencil className="h-4 w-4" />
                     </button>
                   )}
@@ -315,7 +315,7 @@ export function RoleFormPage() {
   return (
     <PageShell title={editing ? "Edit Role" : "New Role"}>
       <form
-        className="max-w-3xl space-y-5 rounded-[22px] border border-[#EEEFF3] bg-white p-6"
+        className="max-w-3xl space-y-5 rounded-2xl border border-border bg-card p-6"
         onSubmit={async (event) => {
           event.preventDefault();
           setBusy(true);
@@ -344,7 +344,7 @@ export function RoleFormPage() {
           <textarea className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm" value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="flex gap-2">
-          <Button className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]" disabled={busy}>{editing ? "Save Role" : "Create Role"}</Button>
+          <Button className="rounded-full bg-primary hover:bg-primary/90" disabled={busy}>{editing ? "Save Role" : "Create Role"}</Button>
           <Button type="button" variant="outline" className="rounded-full" onClick={() => navigate("/admin/roles")}>Cancel</Button>
         </div>
       </form>
@@ -402,7 +402,7 @@ export function PermissionsPage() {
           </select>
           <Button variant="outline" className="rounded-full" onClick={() => void load()}>Refresh</Button>
           <Button
-            className="rounded-full bg-[#5b5ce6] hover:bg-[#4F46E5]"
+            className="rounded-full bg-primary hover:bg-primary/90"
             disabled={busy || locked}
             onClick={async () => {
               if (!roleId) return;
@@ -424,7 +424,7 @@ export function PermissionsPage() {
       }
     >
       {locked && <p className="text-sm text-amber-700">Super Admin always has every permission.</p>}
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>

@@ -4,6 +4,7 @@ import { FONTS, typeLabel } from "@shared/profileTypes";
 import { SECTION_REGISTRY, SECTION_TYPES } from "@shared/sections";
 import { api } from "@/lib/api";
 import { profileUrl } from "@/lib/utils";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PublishBadge, StatusBadge } from "@/components/admin/StatusBadges";
@@ -26,9 +27,9 @@ export function PagesHubPage() {
   }, []);
   return (
     <Hub title="Pages" hint="Every published profile is a mini website. NFC and QR open the same URL.">
-      <div className="overflow-hidden rounded-2xl border bg-white">
+      <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-[#f7f4ee] text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted text-left text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Page</th>
               <th>Type</th>
@@ -75,7 +76,7 @@ export function SectionsHubPage() {
           <Link
             key={section.id}
             to={`/admin/profiles/${section.profileId}?tab=website`}
-            className="flex items-center justify-between rounded-xl border bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:border-[#1b6b5a]/20 hover:shadow-sm"
+            className="flex items-center justify-between rounded-xl border bg-card px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-sm"
           >
             <div>
               <p className="font-medium">{section.title}</p>
@@ -101,7 +102,7 @@ export function ProductsHubPage() {
         <p className="text-sm text-muted-foreground">No product sections yet. Open a profile builder and add a Products section.</p>
       ) : (
         sections.map((section) => (
-          <Link key={section.id} to={`/admin/profiles/${section.profileId}?tab=website`} className="flex justify-between rounded-xl border bg-white px-4 py-3">
+          <Link key={section.id} to={`/admin/profiles/${section.profileId}?tab=website`} className="flex justify-between rounded-xl border bg-card px-4 py-3">
             <span>{section.profileName}</span>
             <span className="text-sm text-muted-foreground">{section.title}</span>
           </Link>
@@ -155,7 +156,7 @@ export function SocialHubPage() {
   return (
     <Hub title="Social media" hint="Empty links are never shown on the public website.">
       {rows.map(({ profile, link }, index) => (
-        <Link key={`${profile.id}-${link.platform}-${index}`} to={`/admin/profiles/${profile.id}?tab=social`} className="flex items-center justify-between rounded-xl border bg-white px-4 py-3">
+        <Link key={`${profile.id}-${link.platform}-${index}`} to={`/admin/profiles/${profile.id}?tab=social`} className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
           <div>
             <p className="font-medium">{link.platform}{link.username ? ` · @${link.username}` : ""}</p>
             <p className="text-xs text-muted-foreground">{profile.name}</p>
@@ -185,7 +186,7 @@ export function ContactHubPage() {
         ].filter(Boolean);
         if (!items.length) return null;
         return (
-          <Link key={profile.id} to={`/admin/profiles/${profile.id}?tab=content`} className="flex items-center justify-between rounded-xl border bg-white px-4 py-3">
+          <Link key={profile.id} to={`/admin/profiles/${profile.id}?tab=content`} className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
             <div>
               <p className="font-medium">{profile.name}</p>
               <p className="text-xs text-muted-foreground">{items.join(" · ")}</p>
@@ -201,10 +202,7 @@ export function ContactHubPage() {
 function Hub({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
-      </div>
+      <PageHeader title={title} description={hint} />
       <div className="space-y-2">{children}</div>
     </div>
   );

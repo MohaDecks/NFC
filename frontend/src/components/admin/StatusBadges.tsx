@@ -3,7 +3,7 @@ import type { ProfileStatus, PublishState } from "@shared/profileTypes";
 
 export function StatusBadge({ status }: { status: ProfileStatus }) {
   if (status === "ACTIVE") return <Badge variant="success">Active</Badge>;
-  if (status === "BLOCKED") return <Badge className="border-transparent bg-red-100 text-red-800">Blocked</Badge>;
+  if (status === "BLOCKED") return <Badge className="border-transparent bg-red-500/15 text-red-700 dark:text-red-300">Blocked</Badge>;
   return <Badge variant="warning">Inactive</Badge>;
 }
 

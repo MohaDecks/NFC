@@ -43,7 +43,7 @@ export function CardTypesPage() {
       </div>
       {can("types.create") && (
         <form
-          className="grid gap-3 rounded-[22px] border border-[#EEEFF3] bg-white p-4 md:grid-cols-[1fr_1.4fr_auto] md:items-end"
+          className="grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-[1fr_1.4fr_auto] md:items-end"
           onSubmit={async (event) => {
             event.preventDefault();
             try {
@@ -68,7 +68,7 @@ export function CardTypesPage() {
             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Appears in the business card dropdown" />
           </div>
           <div className="flex gap-2">
-            <Button className="rounded-full bg-[#1565C0] hover:bg-[#0D47A1]">{editing ? "Save" : "+ Register type"}</Button>
+            <Button className="rounded-full bg-primary hover:bg-primary/90">{editing ? "Save" : "+ Register type"}</Button>
             {editing && (
               <Button type="button" variant="outline" className="rounded-full" onClick={() => { setEditing(null); setName(""); setDescription(""); }}>
                 Cancel
@@ -77,7 +77,7 @@ export function CardTypesPage() {
           </div>
         </form>
       )}
-      <div className="overflow-hidden rounded-[22px] border border-[#EEEFF3] bg-white">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wide text-slate-400">
             <tr>
@@ -100,7 +100,7 @@ export function CardTypesPage() {
                   {can("types.edit") && (
                     <button
                       type="button"
-                      className="mr-2 text-[#1565C0]"
+                      className="mr-2 text-primary"
                       onClick={async () => {
                         await api.patch(`/api/admin/profile-types/${row.id}`, { status: row.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" });
                         await load();
@@ -110,7 +110,7 @@ export function CardTypesPage() {
                     </button>
                   )}
                   {can("types.edit") && (
-                    <button type="button" className="mr-2 text-[#1565C0]" onClick={() => { setEditing(row); setName(row.name); setDescription(row.description); }}>
+                    <button type="button" className="mr-2 text-primary" onClick={() => { setEditing(row); setName(row.name); setDescription(row.description); }}>
                       <Pencil className="h-4 w-4" />
                     </button>
                   )}
