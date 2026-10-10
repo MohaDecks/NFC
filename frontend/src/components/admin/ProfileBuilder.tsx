@@ -160,9 +160,7 @@ export function ProfileBuilder({ profile, onChange }: { profile: AdminProfile; o
             Open full page
           </a>
         </div>
-        <div className="max-h-[85vh] overflow-auto">
-          <ProfileRenderer profile={preview} template={profile.design.template} fullPage />
-        </div>
+        <ProfileRenderer profile={preview} template={profile.design.template} fullPage />
       </section>
     </div>
   );
